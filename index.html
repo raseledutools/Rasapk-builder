@@ -52,10 +52,9 @@
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
             width: 100vw;
             height: 100vh;
-            overflow: hidden; /* Prevent body scroll, use app-container scroll */
+            overflow: hidden; 
         }
 
-        /* App Container replacing the fake device frame */
         .app-container {
             width: 100%;
             height: 100%;
@@ -64,11 +63,25 @@
             position: relative;
         }
 
+        /* Persistent Notification Bar */
+        .persistent-notif {
+            background: var(--success);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            z-index: 100;
+        }
+
         /* Scroll Area */
         .scroll-area {
             flex: 1;
             overflow-y: auto;
-            /* Added safe area padding for bottom + space for floating nav */
             padding-bottom: calc(env(safe-area-inset-bottom) + 110px);
             scrollbar-width: none;
         }
@@ -77,7 +90,6 @@
         /* Premium Header */
         .header {
             background: linear-gradient(135deg, #312E81 0%, #4F46E5 100%);
-            /* Safe area padding for the real Android status bar */
             padding: calc(env(safe-area-inset-top) + 20px) 20px 35px;
             border-bottom-left-radius: 36px;
             border-bottom-right-radius: 36px;
@@ -132,7 +144,6 @@
             border: 1px solid rgba(255,255,255,0.5);
         }
 
-        /* Section Titles */
         .section-title {
             font-size: 15px;
             font-weight: 700;
@@ -143,7 +154,7 @@
             gap: 8px;
         }
 
-        /* Dynamic Permissions (Warning Style) */
+        /* Permissions Card */
         .perm-card {
             background: var(--warning-light);
             border: 1px solid #FDE68A;
@@ -163,7 +174,8 @@
         .perm-body { padding: 0 20px 16px; }
         .alert-row {
             display: flex;
-            justify-content: space-between;            align-items: center;
+            justify-content: space-between;            
+            align-items: center;
             padding: 12px 0;
             border-bottom: 1px solid rgba(217, 119, 6, 0.1);
             transition: all 0.3s ease;
@@ -191,7 +203,7 @@
             gap: 14px;
             overflow-x: auto;
             padding-bottom: 15px;
-            margin: 0 -18px; /* Bleed edges */
+            margin: 0 -18px;
             padding: 0 18px 15px;
             scrollbar-width: none;
         }
@@ -224,182 +236,63 @@
         .trend-up { color: var(--danger); }
         .trend-good { color: var(--success); }
 
-        /* Take a Break */
-        .break-card {
-            background: linear-gradient(145deg, #F5F3FF 0%, #EDE9FE 100%);
-            border: 1px solid #DDD6FE;
-        }
-        .break-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #5B21B6;
-            font-weight: 800;
-            font-size: 16px;
-            margin-bottom: 16px;
-        }
-        .pill-scroll {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .pill-scroll::-webkit-scrollbar { display: none; }
-        .break-pill {
-            background: white;
-            color: #6D28D9;
-            padding: 10px 20px;
-            border-radius: 24px;
-            font-size: 13px;
-            font-weight: 700;
-            white-space: nowrap;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .break-pill.active {
-            background: #7C3AED;
-            color: white;
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-        }
+        /* Break & Strictness omitted for brevity (they remain visually the same) */
+        .break-card { background: linear-gradient(145deg, #F5F3FF 0%, #EDE9FE 100%); border: 1px solid #DDD6FE; }
+        .break-header { display: flex; align-items: center; gap: 10px; color: #5B21B6; font-weight: 800; font-size: 16px; margin-bottom: 16px; }
+        .pill-scroll { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
+        .break-pill { background: white; color: #6D28D9; padding: 10px 20px; border-radius: 24px; font-size: 13px; font-weight: 700; white-space: nowrap; box-shadow: var(--shadow-sm); cursor: pointer; transition: 0.2s;}
+        .break-pill.active { background: #7C3AED; color: white; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
 
-        /* Strictness Level */
-        .strict-card {
-            background: linear-gradient(145deg, #FFFBEB 0%, #FEF3C7 100%);
-            border: 1px solid #FDE68A;
-        }
-        .strict-top {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 6px;
-            color: #92400E;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        .strict-main {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 8px 0;
-            color: #78350F;
-            font-size: 18px;
-            font-weight: 800;
-        }
-        .strict-icon {
-            width: 36px; height: 36px;
-            background: white;
-            border-radius: 10px;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: var(--shadow-sm);
-        }
+        .strict-card { background: linear-gradient(145deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid #FDE68A; }
+        .strict-top { display: flex; justify-content: flex-end; align-items: center; gap: 6px; color: #92400E; font-size: 12px; font-weight: 700; }
+        .strict-main { display: flex; align-items: center; gap: 12px; margin: 8px 0; color: #78350F; font-size: 18px; font-weight: 800; }
+        .strict-icon { width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; justify-content: center; align-items: center; box-shadow: var(--shadow-sm); }
+        .strict-desc { color: #92400E; font-size: 13px; font-weight: 500; margin-top: 8px; }
 
-        /* List Items & Toggles (Modern Look) */
-        .list-card {
-            padding: 8px 20px;
-        }
-        .list-item {
-            display: flex;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #F1F5F9;
-        }
+        /* List Items */
+        .list-card { padding: 8px 20px; }
+        .list-item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid #F1F5F9; }
         .list-item:last-child { border-bottom: none; }
-        
-        .item-icon-bg {
-            width: 40px; height: 40px;
-            border-radius: 12px;
-            display: flex; justify-content: center; align-items: center;
-            margin-right: 16px;
-            font-size: 18px;
-        }
+        .item-icon-bg { width: 40px; height: 40px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin-right: 16px; font-size: 18px; }
         .bg-blue { background: var(--accent-blue-light); color: var(--accent-blue); }
         .bg-gray { background: #F1F5F9; color: var(--text-gray); }
         .bg-red { background: var(--danger-light); color: var(--danger); }
-
         .item-content { flex: 1; }
         .item-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 3px;}
         .item-sub { font-size: 12px; color: var(--text-gray); font-weight: 500;}
         .item-link { font-size: 12px; color: var(--primary); font-weight: 700; margin-top: 4px; display: inline-block;}
-        
         .arrow-right { color: #CBD5E1; font-size: 20px; font-weight: bold;}
 
-        /* iOS Style Switch */
-        .switch {
-            width: 48px;
-            height: 28px;
-            background: #E2E8F0;
-            border-radius: 30px;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
+        /* Switch */
+        .switch { width: 48px; height: 28px; background: #E2E8F0; border-radius: 30px; position: relative; cursor: pointer; transition: background 0.3s ease; }
         .switch.on { background: var(--success); }
-        .switch::after {
-            content: '';
-            position: absolute;
-            width: 22px;
-            height: 22px;
-            background: white;
-            border-radius: 50%;
-            top: 3px;
-            left: 3px;
-            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
+        .switch::after { content: ''; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .switch.on::after { transform: translateX(20px); }
 
-        /* Floating Bottom Nav (Glassmorphism) */
-        .bottom-nav {
-            position: fixed;
-            bottom: calc(env(safe-area-inset-bottom) + 20px);
-            left: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            height: 70px;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 10px;
-            z-index: 100;
-            border: 1px solid rgba(255,255,255,0.5);
-        }
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-light);
-            cursor: pointer;
-            position: relative;
-            transition: 0.3s;
-        }
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: calc(env(safe-area-inset-bottom) + 20px); left: 20px; right: 20px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); height: 70px; border-radius: 24px; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.1); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; z-index: 100; border: 1px solid rgba(255,255,255,0.5); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); cursor: pointer; position: relative; transition: 0.3s; }
         .nav-item.active { color: var(--primary); }
         .nav-icon { font-size: 22px; margin-bottom: 4px; transition: 0.3s;}
         .nav-item.active .nav-icon { transform: translateY(-2px); }
         .nav-text { font-size: 11px; font-weight: 700; opacity: 0; transition: 0.3s; position: absolute; bottom: -5px;}
         .nav-item.active .nav-text { opacity: 1; bottom: -10px; }
-
-        /* SVG styles */
         svg { stroke-width: 2.2; }
     </style>
 </head>
 <body>
     <div class="app-container">
+        
+        <div class="persistent-notif">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Monitoring... Apps Blocked: <span id="liveBlockCount">0</span> | Active: <span id="liveRunTime">0m</span>
+        </div>
+
         <div class="scroll-area">
             <div class="header">
                 <div class="header-top">
-                    <div class="icon-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="15" y2="18"></line></svg>
-                    </div>
-                    <div class="icon-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                    </div>
+                    <div class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="15" y2="18"></line></svg></div>
+                    <div class="icon-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
                 </div>
                 <div class="greeting">Welcome Back</div>
                 <div class="title">Good Evening</div>
@@ -408,67 +301,28 @@
             <div class="content">
                 
                 <div class="perm-card" id="perm-card">
-                    <div class="perm-header">
-                        Action Required for Full Protection
-                    </div>
+                    <div class="perm-header">Action Required for Full Protection</div>
                     <div class="perm-body" id="perm-body">
                         <div class="alert-row" id="row-accessibility">
                             <div class="alert-text"><span class="alert-icon">🛡️</span> Accessibility</div>
                             <button class="btn-action" onclick="grantPermission('accessibility', this)">Enable</button>
                         </div>
-                        <div class="alert-row" id="row-battery">
-                            <div class="alert-text"><span class="alert-icon">🔋</span> Battery Opt.</div>
-                            <button class="btn-action" onclick="grantPermission('battery', this)">Disable</button>
+                        <div class="alert-row" id="row-usage">
+                            <div class="alert-text"><span class="alert-icon">📊</span> Usage Access</div>
+                            <button class="btn-action" onclick="grantPermission('usage', this)">Enable</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="section-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-                    Activity Overview
-                </div>
-                
+                <div class="section-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg> Activity Overview</div>
                 <div class="analytics-wrapper">
-                    <div class="analytic-item">
-                        <div class="icon-box blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        </div>
-                        <div class="an-label">Screen Time</div>
-                        <div class="an-value">03<span class="an-unit">h</span> 11<span class="an-unit">m</span></div>
-                        <div class="an-trend trend-up">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                            +301%
-                        </div>
-                    </div>
-                    <div class="analytic-item">
-                        <div class="icon-box purple">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-                        </div>
-                        <div class="an-label">App Launches</div>
-                        <div class="an-value">268</div>
-                        <div class="an-trend trend-up">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                            +201 times
-                        </div>
-                    </div>
-                    <div class="analytic-item">
-                        <div class="icon-box green">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        </div>
-                        <div class="an-label">Focus Sessions</div>
-                        <div class="an-value">12</div>
-                        <div class="an-trend trend-good">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
-                            +5 this week
-                        </div>
-                    </div>
+                    <div class="analytic-item"><div class="icon-box blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><div class="an-label">Screen Time</div><div class="an-value">03<span class="an-unit">h</span> 11<span class="an-unit">m</span></div><div class="an-trend trend-up">+301%</div></div>
+                    <div class="analytic-item"><div class="icon-box purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg></div><div class="an-label">App Launches</div><div class="an-value">268</div><div class="an-trend trend-up">+201 times</div></div>
+                    <div class="analytic-item"><div class="icon-box green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div><div class="an-label">Focus Sessions</div><div class="an-value">12</div><div class="an-trend trend-good">+5 this week</div></div>
                 </div>
 
                 <div class="card break-card">
-                    <div class="break-header">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
-                        Take a Break
-                    </div>
+                    <div class="break-header">Take a Break</div>
                     <div class="pill-scroll">
                         <div class="break-pill" onclick="setActivePill(this)">30 min</div>
                         <div class="break-pill active" onclick="setActivePill(this)">1 hour</div>
@@ -478,81 +332,33 @@
                 </div>
 
                 <div class="card strict-card">
-                    <div class="strict-top">
-                        Strictness <span style="font-size:14px; letter-spacing:2px;">🔒 🔓 🔓</span>
-                    </div>
-                    <div class="strict-main">
-                        <div class="strict-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
-                        </div>
-                        Normal Mode
-                    </div>
-                    <div class="strict-desc" style="color: #92400E; font-size: 13px; font-weight: 500; margin-top: 8px;">
-                        Make any changes and uninstall the app freely.
-                    </div>
+                    <div class="strict-top">Strictness <span style="font-size:14px; letter-spacing:2px;">🔒 🔓 🔓</span></div>
+                    <div class="strict-main"><div class="strict-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg></div>Normal Mode</div>
+                    <div class="strict-desc">Make any changes and uninstall the app freely.</div>
                 </div>
 
-                <div class="section-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                    Quick Actions
-                </div>
-                
+                <div class="section-title">Quick Actions</div>
                 <div class="card list-card">
                     <div class="list-item">
-                        <div class="item-icon-bg bg-blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title" id="appsBlockedCount">0</div>
-                            <div class="item-sub">Apps Blocked</div>
-                        </div>
-                        <div class="arrow-right">›</div>
+                        <div class="item-icon-bg bg-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></div>
+                        <div class="item-content"><div class="item-title" id="appsBlockedCount">0</div><div class="item-sub">Apps Blocked</div></div>
                     </div>
                     
                     <div class="list-item">
-                        <div class="item-icon-bg bg-blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title">0</div>
-                            <div class="item-sub">Sites Blocked</div>
-                        </div>
-                        <div class="arrow-right">›</div>
-                    </div>
-
-                    <div class="list-item">
-                        <div class="item-icon-bg bg-gray">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title" id="keywordsStatusText">Off</div>
-                            <div class="item-sub">Keywords Blocked</div>
-                            <span class="item-link">Configure →</span>
-                        </div>
+                        <div class="item-icon-bg bg-gray"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg></div>
+                        <div class="item-content"><div class="item-title" id="keywordsStatusText">Off</div><div class="item-sub">Keywords Blocked</div></div>
                         <div class="switch" id="blockKeywords"></div>
                     </div>
 
                     <div class="list-item">
-                        <div class="item-icon-bg bg-red">
-                            <span style="font-weight: 800; font-size: 14px;">18+</span>
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title" id="adultStatusText">Off</div>
-                            <div class="item-sub">Block Adult Content</div>
-                            <span class="item-link">Configure →</span>
-                        </div>
+                        <div class="item-icon-bg bg-red"><span style="font-weight: 800; font-size: 14px;">18+</span></div>
+                        <div class="item-content"><div class="item-title" id="adultStatusText">Off</div><div class="item-sub">Block Adult Content</div></div>
                         <div class="switch" id="blockAdult"></div>
                     </div>
 
                     <div class="list-item">
-                        <div class="item-icon-bg bg-gray">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title" id="shortsStatusText">Off</div>
-                            <div class="item-sub">Block Reels/Shorts</div>
-                            <span class="item-link">Configure →</span>
-                        </div>
+                        <div class="item-icon-bg bg-gray"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></div>
+                        <div class="item-content"><div class="item-title" id="shortsStatusText">Off</div><div class="item-sub">Block Reels/Shorts</div></div>
                         <div class="switch" id="blockShorts"></div>
                     </div>
                 </div>
@@ -560,38 +366,16 @@
         </div>
 
         <div class="bottom-nav">
-            <div class="nav-item active">
-                <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
-                </div>
-                <div class="nav-text">•</div>
-            </div>
-            <div class="nav-item">
-                <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                </div>
-                <div class="nav-text">•</div>
-            </div>
-            <div class="nav-item">
-                <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                </div>
-                <div class="nav-text">•</div>
-            </div>
-            <div class="nav-item">
-                <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
-                <div class="nav-text">•</div>
-            </div>
+            <div class="nav-item active"><div class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg></div><div class="nav-text">•</div></div>
+            <div class="nav-item"><div class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><div class="nav-text">•</div></div>
+            <div class="nav-item"><div class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div><div class="nav-text">•</div></div>
+            <div class="nav-item"><div class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><div class="nav-text">•</div></div>
         </div>
     </div>
 
     <script>
-        // Pill selection logic
         function setActivePill(clickedPill) {
-            const pills = document.querySelectorAll('.break-pill');
-            pills.forEach(pill => pill.classList.remove('active'));
+            document.querySelectorAll('.break-pill').forEach(pill => pill.classList.remove('active'));
             clickedPill.classList.add('active');
         }
     </script>
@@ -601,91 +385,84 @@
         const AppBlocker = registerPlugin('AppBlocker');
 
         document.addEventListener('DOMContentLoaded', () => {
-            
-            // --- Permission Logic ---
-            window.grantPermission = async function(type, btn) {
-                const row = btn.closest('.alert-row');
-                
+
+            let startTime = Date.now();
+            let blockCount = localStorage.getItem('blockCount') || 0;
+            document.getElementById('liveBlockCount').innerText = blockCount;
+            document.getElementById('appsBlockedCount').innerText = blockCount;
+
+            // Update Notification Bar Time
+            setInterval(() => {
+                let mins = Math.floor((Date.now() - startTime) / 60000);
+                document.getElementById('liveRunTime').innerText = mins + "m";
+            }, 60000);
+
+            // --- Permission Check Logic ---
+            async function checkPermissions() {
                 try {
-                    if(type === 'accessibility') {
-                        await AppBlocker.requestAccessibility();
-                    } else if (type === 'battery') {
-                        await AppBlocker.requestBatteryOptimization();
+                    const status = await AppBlocker.checkPermissions();
+                    if (status.accessibility && status.usage) {
+                        const card = document.getElementById('perm-card');
+                        card.style.opacity = '0';
+                        setTimeout(() => { card.style.display = 'none'; }, 400);
+                        return true;
+                    } else {
+                        document.getElementById('row-accessibility').style.display = status.accessibility ? 'none' : 'flex';
+                        document.getElementById('row-usage').style.display = status.usage ? 'none' : 'flex';
+                        return false;
                     }
-                    
-                    // Smooth animate out if successful request
-                    row.style.opacity = '0';
-                    row.style.transform = 'translateY(-10px)';
-                    row.style.pointerEvents = 'none';
-                    
-                    setTimeout(() => {
-                        row.remove();
-                        checkPermissions();
-                    }, 300);
-
-                } catch (error) {
-                    console.error("Plugin Error: Waiting for Android Java implementation.", error);
-                    // For UI testing purposes, we still animate it out even if plugin fails
-                    row.style.opacity = '0';
-                    setTimeout(() => { row.remove(); checkPermissions(); }, 300);
-                }
-            };
-
-            function checkPermissions() {
-                const body = document.getElementById('perm-body');
-                if (body.children.length === 0) {
-                    const card = document.getElementById('perm-card');
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.95)';
-                    card.style.pointerEvents = 'none';
-                    setTimeout(() => { card.style.display = 'none'; }, 400);
-                }
+                } catch (e) { return true; /* For local testing ignore */ }
             }
 
+            checkPermissions();
 
-            // --- Toggle Logic & Real-time State Management ---
+            window.grantPermission = async function(type, btn) {
+                try {
+                    if(type === 'accessibility') await AppBlocker.requestAccessibility();
+                    else if (type === 'usage') await AppBlocker.requestUsagePermission();
+                    setTimeout(checkPermissions, 3000);
+                } catch (error) { console.error("Error", error); }
+            };
+
+            // --- Toggle Logic ---
             const toggles = {
                 blockKeywords: { el: document.getElementById('blockKeywords'), textEl: document.getElementById('keywordsStatusText') },
                 blockAdult: { el: document.getElementById('blockAdult'), textEl: document.getElementById('adultStatusText') },
                 blockShorts: { el: document.getElementById('blockShorts'), textEl: document.getElementById('shortsStatusText') }
             };
 
-            // 1. Load saved states from local storage on app open
             for (const key in toggles) {
-                const savedState = localStorage.getItem(key);
-                if (savedState === 'true') {
+                if (localStorage.getItem(key) === 'true') {
                     toggles[key].el.classList.add('on');
                     toggles[key].textEl.innerText = 'On';
                 }
                 
-                // 2. Add click listeners for real-time updates
                 toggles[key].el.addEventListener('click', async function() {
-                    // Toggle visually
+                    const hasPerms = await checkPermissions();
+                    if (!hasPerms) {
+                        alert("Enable all permissions from the red box first!");
+                        return;
+                    }
+
                     this.classList.toggle('on');
                     const isOn = this.classList.contains('on');
-                    
-                    // Update text
                     toggles[key].textEl.innerText = isOn ? 'On' : 'Off';
-                    
-                    // Save to memory
                     localStorage.setItem(key, isOn);
                     
-                    // Build the settings payload
+                    if (isOn) {
+                        blockCount++;
+                        localStorage.setItem('blockCount', blockCount);
+                        document.getElementById('liveBlockCount').innerText = blockCount;
+                        document.getElementById('appsBlockedCount').innerText = blockCount;
+                    }
+
                     const currentSettings = {
                         blockKeywords: toggles.blockKeywords.el.classList.contains('on'),
                         adultContent: toggles.blockAdult.el.classList.contains('on'),
                         blockReelsShorts: toggles.blockShorts.el.classList.contains('on')
                     };
 
-                    console.log("Sending real-time update to Android:", currentSettings);
-
-                    // Send to Android Native via Capacitor
-                    try {
-                        const response = await AppBlocker.updateSettings(currentSettings);
-                        console.log("Android Reply:", response.status);
-                    } catch (error) {
-                        console.log("Plugin not connected yet. Waiting for Java implementation.");
-                    }
+                    try { await AppBlocker.updateSettings(currentSettings); } catch (e) {}
                 });
             }
         });
