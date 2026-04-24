@@ -17,37 +17,93 @@ public class FocusAccessibilityService extends AccessibilityService {
     private View overlayView;
     private boolean isOverlayShowing = false;
 
-    // টেস্টিংয়ের জন্য সরাসরি এই অ্যাপগুলোর প্যাকেজ নাম দিয়ে দিলাম
-    private final List<String> testAppsToBlock = Arrays.asList(
-            "com.facebook.katana",      // Facebook
-            "com.google.android.youtube", // YouTube
-            "com.android.chrome"        // Google Chrome
+    // আপনার C++ কোড থেকে নেওয়া বিশাল কিওয়ার্ড এবং ওয়েবসাইটের লিস্ট (বাংলা ও ইংরেজি)
+    private final List<String> badKeywords = Arrays.asList(
+            "porn", "xxx", "sex", "nude", "nsfw", "sexy", "hentai", "rule34", "milf", 
+            "blowjob", "tits", "boobs", "pussy", "dick", "cock", "escort", "bdsm", 
+            "fetish", "erotica", "dildo", "webcam", "camgirls", "xvideos", "pornhub", 
+            "xnxx", "xhamster", "brazzers", "onlyfans", "playboy", "chaturbate", 
+            "stripchat", "eporner", "spankbang", "redtube", "youporn", "mia khalifa", 
+            "sunny leone", "dani daniels", "johnny sins", "kendra lust",
+            "চটি", "পর্ণ", "সেক্স", "নগ্ন", "উলঙ্গ", "বেশ্যা", "মাগি", "খানকি", 
+            "যৌন", "পর্ণগ্রাফি", "রেন্ডি", "চোদাচুতি", "গরম ভিডিও", "খারাপ ছবি",
+            "যৌন মিলন", "যৌনাঙ্গ", "চুদো", "নগ্নতা",
+            "bhabi", "chudai", "bangla choti", "panu", "desi bhabi", "mms", "magi", 
+            "choda", "chodachudi", "khanki", "besha", "randi", "nengta", "nangta", 
+            "baal", "vodai", "bokachoda", "kuttar bacha", "shuarer bacha",
+            "hot dance", "seductive dance", "item song", "belly dance", "hot romance", 
+            "kissing scene", "bikini", "swimsuit", "sexy dance", "cleavage", "hot scene", 
+            "romantic kiss", "bedroom scene", "bath scene", "rain dance", "bold scene", 
+            "semi nude", "lingerie", "erotic", "hot song", "romantic video hot", 
+            "navel show", "deep neck", "short dress sexy", "unfaithful scene",
+            "pornhub.com", "xvideos.com", "xnxx.com", "xhamster.com", "redtube.com",
+            "brazzers.com", "spankbang.com", "eporner.com", "chaturbate.com"
     );
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
+        
+        // সব ধরনের ইভেন্ট শোনা হবে (ওপেন হওয়া, টাইপ করা, স্ক্রল করা)
+        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED 
+                        | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED 
+                        | AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                        | AccessibilityEvent.TYPE_VIEW_CLICKED;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
-        info.flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+        info.flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS | AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS;
         this.setServiceInfo(info);
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (event.getPackageName() == null) return;
-            
-            String packageName = event.getPackageName().toString();
+        if (event.getPackageName() == null) return;
+        String packageName = event.getPackageName().toString();
 
-            // এখানে আর SharedPreferences বা টগল চেক করছি না
-            // সরাসরি চেক করছি ওপেন করা অ্যাপটি আমাদের টেস্ট লিস্টে আছে কি না
-            if (testAppsToBlock.contains(packageName)) {
-                showBlockOverlay();
-            } else {
-                hideBlockOverlay();
+        // ইভেন্ট থেকে সব লেখা (Text এবং Description) একসাথে বের করা
+        StringBuilder eventTextBuilder = new StringBuilder();
+        if (event.getText() != null) {
+            for (CharSequence charSequence : event.getText()) {
+                eventTextBuilder.append(charSequence.toString().toLowerCase()).append(" ");
             }
+        }
+        if (event.getContentDescription() != null) {
+            eventTextBuilder.append(event.getContentDescription().toString().toLowerCase());
+        }
+        
+        String eventText = eventTextBuilder.toString();
+        if (eventText.isEmpty()) return;
+
+        boolean shouldBlock = false;
+
+        // লজিক ১: যেকোনো জায়গায় খারাপ শব্দ টাইপ বা সার্চ করলে সাথে সাথে ব্লক!
+        for (String keyword : badKeywords) {
+            if (eventText.contains(keyword)) {
+                shouldBlock = true;
+                break;
+            }
+        }
+
+        // লজিক ২: ইউটিউব শর্টস (YouTube Shorts) ব্লক!
+        // (ইউটিউব চলবে, কিন্তু Shorts ট্যাবে গেলে বা Shorts লেখা স্ক্রিনে আসলেই ব্লক)
+        if (!shouldBlock && packageName.equals("com.google.android.youtube")) {
+            if (eventText.contains("shorts") || eventText.contains("short") || eventText.contains("শর্টস")) {
+                shouldBlock = true;
+            }
+        }
+
+        // লজিক ৩: ফেসবুক রিলস (Facebook Reels) ব্লক!
+        if (!shouldBlock && packageName.equals("com.facebook.katana")) {
+            if (eventText.contains("reels") || eventText.contains("reel") || eventText.contains("রিলস")) {
+                shouldBlock = true;
+            }
+        }
+
+        // ব্লক করার নির্দেশ পেলে লাথি মেরে হোমে পাঠানো
+        if (shouldBlock) {
+            showBlockOverlay();
+        } else {
+            hideBlockOverlay();
         }
     }
 
@@ -56,7 +112,7 @@ public class FocusAccessibilityService extends AccessibilityService {
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         overlayView = new View(this);
-        overlayView.setBackgroundColor(Color.parseColor("#E11D48")); // টেস্ট করার জন্য কড়া লাল রঙ (Danger Red)
+        overlayView.setBackgroundColor(Color.parseColor("#E11D48")); // কড়া লাল রঙ (Danger Red)
 
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -71,10 +127,10 @@ public class FocusAccessibilityService extends AccessibilityService {
             windowManager.addView(overlayView, params);
             isOverlayShowing = true;
             
-            // সাথে সাথে হোম স্ক্রিনে পাঠিয়ে দেওয়া
+            // সাথে সাথে হোম স্ক্রিনে পাঠিয়ে দেওয়া
             performGlobalAction(GLOBAL_ACTION_HOME); 
             
-            // ২ সেকেন্ড পর ওভারলে সরিয়ে নেওয়া
+            // ২ সেকেন্ড পর ওভারলে সরিয়ে নেওয়া
             overlayView.postDelayed(this::hideBlockOverlay, 2000); 
 
         } catch (Exception e) {
