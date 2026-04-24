@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22' # Node.js 22 সেট করা হয়েছে
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
@@ -26,11 +26,10 @@ jobs:
           distribution: 'temurin'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm install --force
 
       - name: Sync Capacitor
         run: |
-          # public ফোল্ডারের ফাইলগুলো android প্রজেক্টে কপি করবে
           npx cap sync android
 
       - name: Build Debug APK
