@@ -6,7 +6,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
@@ -21,11 +20,12 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.core.app.NotificationCompat;
-import org.json.JSONArray;
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FocusAccessibilityService extends AccessibilityService {
 
@@ -34,136 +34,211 @@ public class FocusAccessibilityService extends AccessibilityService {
     private boolean isOverlayShowing = false;
     private final Random random = new Random();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private long serviceStartTime;
+    private final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
 
-    // --- মেমোরি ধরে রাখার জন্য Strong Reference (যাতে UI এর কল মিস না হয়) ---
-    private SharedPreferences prefs;
-    private SharedPreferences.OnSharedPreferenceChangeListener prefsListener;
-
-    private boolean isKwOn = false;
-    private boolean isAdultOn = false;
-    private boolean isShortsOn = false;
-    private List<String> customKeywordsList = new ArrayList<>();
-
+    // Quotes List (Bengali + English combined)
     private final List<String> quotes = Arrays.asList(
             "“দৃষ্টি অবনত রাখুন এবং চরিত্র হেফাজত করুন।”\n- আল কুরআন",
-            "“সময়ের সঠিক ব্যবহারই সফলতার চাবিকাঠি।”",
-            "“লজ্জাশীলতা ঈমানের অঙ্গ।”\n- হাদিস",
-            "“আজকের ত্যাগের বিনিময়ে আগামীকালের সফলতা আসবে।”",
-            "“বড় কিছু পেতে হলে ছোট আনন্দগুলো ত্যাগ করতে হয়।”"
+            "“সফলতা আসে ফোকাস থেকে, ডিস্ট্রাকশন থেকে নয়।”\nSuccess comes from focus, not from distraction.",
+            "“আজকের সময় নষ্ট মানে, কালকের স্বপ্ন নষ্ট।”\nWasting time today means ruining tomorrow's dreams.",
+            "“বড় কিছু পেতে হলে ছোট আনন্দগুলো ত্যাগ করতে হয়।”\nTo achieve something big, you have to sacrifice small pleasures.",
+            "“যে নিজের মনকে নিয়ন্ত্রণ করতে পারে, সে পৃথিবী জয় করতে পারে।”\nHe who can control his mind can conquer the world.",
+            "“যেখানে মনোযোগ যায়, সেখানেই শক্তি প্রবাহিত হয়।”\nWhere focus goes, energy flows.",
+            "“শৃঙ্খলা হলো এখন তুমি কী চাও এবং জীবনের সবচেয়ে বেশি কী চাও তার মধ্যে বেছে নেওয়া।”\nDiscipline is choosing between what you want now and what you want most.",
+            "“তোমার ভবিষ্যৎ তৈরি হয় তুমি আজ কি করছো তার দ্বারা, আগামীকাল নয়।”\nYour future is created by what you do today, not tomorrow.",
+            "“স্ক্রিন থেকে চোখ সরান, নিজের লক্ষ্যের দিকে তাকান।”\nTake your eyes off the screen, look at your goals.",
+            "“যতক্ষণ না তুমি নিজের উপর গর্ববোধ করছো, থেমো না।”\nDon't stop until you're proud.",
+            "“সাময়িক সুখের জন্য দীর্ঘমেয়াদী লক্ষ্য নষ্ট করবেন না।”\nDo not trade your long-term goals for temporary pleasure.",
+            "“মনোযোগ হলো একটি পেশীর মতো, যত ব্যবহার করবেন তত শক্তিশালী হবে।”\nFocus is like a muscle, the more you use it, the stronger it gets.",
+            "“আপনি যা দেখেন, আপনি তাই হয়ে ওঠেন। তাই নিজের চোখকে নিয়ন্ত্রণ করুন।”\nYou become what you consume. Control your eyes."
     );
 
-    private final List<String> defaultAdultKeywords = Arrays.asList(
-            "porn", "xxx", "sex", "nude", "nsfw", "hentai", "xvideos", "pornhub", "xnxx", "xhamster", "brazzers",
-            "choti", "panu", "চটি", "পর্ণ", "সেক্স", "নগ্ন", "উলঙ্গ", "মাগি", "খানকি", "যৌন"
+    // Hardcore Keywords
+    private final List<String> hardcoreKeywords = Arrays.asList(
+            "porn", "xxx", "sex", "nude", "nsfw", "sexy", "hentai", "rule34", "milf", 
+            "blowjob", "tits", "boobs", "pussy", "dick", "cock", "escort", "bdsm", 
+            "fetish", "erotica", "dildo", "webcam", "camgirls", "xvideos", "pornhub", 
+            "xnxx", "xhamster", "brazzers", "onlyfans", "playboy", "chaturbate", 
+            "stripchat", "eporner", "spankbang", "redtube", "youporn", "mia khalifa", 
+            "sunny leone", "dani daniels", "johnny sins", "kendra lust",
+            "anal", "gangbang", "creampie", "cum", "cumshot", "squirt", "orgasm", "masturbation", 
+            "threesome", "orgy", "hardcore", "amateur porn", "uncensored", "bukkake", "deepthroat",
+            "stepmom", "step-sister", "shemale", "tranny", "femboy", "gay porn", "lesbian porn",
+            "bondage", "sadomasochism", "scat", "gloryhole", "handjob", "footjob", "titjob", "paizuri",
+            "doujinshi", "jav", "cuckold", "pov porn", "vr porn", "webcam porn",
+            "চটি", "পর্ণ", "সেক্স", "নগ্ন", "উলঙ্গ", "বেশ্যা", "মাগি", "খানকি", 
+            "যৌন", "পর্ণগ্রাফি", "রেন্ডি", "চোদাচুতি", "গরম ভিডিও", "খারাপ ছবি",
+            "যৌন মিলন", "যৌনাঙ্গ", "চুদো", "নগ্নতা",
+            "চটি গল্প", "বাংলা চটি", "চুদাচুদি", "বৌদি", "ভাবি", "গুদ", "ধোন", "স্তন", "দুধ", 
+            "মদন", "হস্তমৈথুন", "বীর্য", "ধর্ষণ", "সেক্স ভিডিও", "খারাপ সাইট", "নীল ছবি",
+            "কচি মেয়ে", "দেশি মাগি", "মাল", "হট বৌদি",
+            "bhabi", "chudai", "bangla choti", "panu", "desi bhabi", "mms", "magi", 
+            "choda", "chodachudi", "khanki", "besha", "randi", "nengta", "nangta", 
+            "baal", "vodai", "bokachoda", "kuttar bacha", "shuarer bacha", "kharap video",
+            "gud", "dhon", "bara", "banchod", "maderchod", "chuida", "chudte", "mutte", 
+            "hastamaithun", "birjo", "choti golpo", "desi sex", "boudi", "kachi", "khamcha",
+            "khamchi", "hot boudi", "bangla mms", "gandi video", "nangta meye"
+    );
+
+    // Romantic & Suggestive Keywords
+    private final List<String> romanticKeywords = Arrays.asList(
+            "hot dance", "seductive dance", "item song", "belly dance", "hot romance", 
+            "kissing scene", "bikini", "swimsuit", "sexy dance", "cleavage", "hot scene", 
+            "romantic kiss", "bedroom scene", "bath scene", "rain dance", "bold scene", 
+            "semi nude", "lingerie", "erotic", "hot song", "romantic video hot", 
+            "navel show", "deep neck", "short dress sexy", "unfaithful scene",
+            "makeout", "lip lock", "passionate kiss", "hot figure", "figure show", 
+            "wet saree", "desi hot", "navel kissing", "thigh show", "micro mini skirt", 
+            "transparent dress", "bra", "panty", "thong", "bikini try on", 
+            "clothing haul transparent", "yoga pants sexy", "gym shorts hot", "twarking", 
+            "booty shake", "nip slip", "wardrobe malfunction", "adult web series", 
+            "ullu web series", "altbalaji hot", "kooku", "hot photoshoot", "boudoir",
+            "sensual", "steamy", "seduction", "love making", "french kiss", "romantic status", 
+            "hot whatsapp status", "first night scene", "suhaag raat", "honeymoon vlog", 
+            "couple romance", "deep kiss", "neck kiss", "love bite", "hickey", "open shirt", 
+            "shirtless", "backless", "saree draping hot", "saree pallu drop", "hot model", 
+            "sexy model", "swimwear", "beachwear", "pool party hot", "hot shower", 
+            "steamy shower", "tub bath", "massage hot", "body massage sensual", "try on haul sexy", 
+            "plunging neckline", "sideboob", "underboob", "cameltoe", "bouncing", "jiggling", 
+            "slow motion hot", "desi boudi hot", "hot aunty", "saree lover", "desi romance", 
+            "romantic night", "candlelight romance", "bed romance", "cuddling hot", "intimacy", 
+            "intimate scene", "love scene", "passion", "desire", "flirting", "teasing",
+            "web series 18+", "18+ natok", "hot short film", "adult short movie", "prime video hot",
+            "netflix hot scene", "mx player hot", "ullu app", "primeshots", "hotshots",
+            "strip tease", "pole dance", "lap dance", "dirty talk", "roleplay",
+            "হট সিন", "রোমান্টিক ভিডিও", "গরম গান", "আইটেম সং", "শাড়ি পরা", "খোলামেলা", 
+            "বোল্ড সিন", "রোমান্স", "বাশর রাত", "হানিমুন", "প্রেমের সিন", "চুমু",
+            "hot boudi saree", "desi girl hot", "bangla hot song", "kolkata hot actress", 
+            "hot natok scene", "bangla bold scene", "basor raat", "ful sojja", 
+            "boudi debor romance", "jamai bou romance", "shari pora", "bija shari",
+            "chumu khawa", "ador kora", "joriye dhora", "hot dance bangla"
+    );
+
+    // Adult Websites
+    private final List<String> adultWebsites = Arrays.asList(
+            "pornhub.com", "xvideos.com", "xnxx.com", "xhamster.com", "redtube.com",
+            "youporn.com", "beeg.com", "brazzers.com", "spankbang.com", "eporner.com",
+            "chaturbate.com", "thumbzilla.com", "txxx.com", "tnaflix.com", "tube8.com",
+            "youjizz.com", "motherless.com", "porndig.com", "vporn.com", "drtuber.com",
+            "hdporn.com", "pornhd.com", "heavy-r.com", "faproulette.com", "4tube.com",
+            "nuvid.com", "pornbox.com", "sunporno.com", "cliphunter.com", "cumlouder.com",
+            "avgle.com", "javmost.com", "javfree.me", "missav.com", "7mmtv.tv", "jable.tv",
+            "pornpics.com", "imagefap.com", "rule34.xxx", "e621.net",
+            "xhamsterlive.com", "bongaCams.com", "livejasmin.com", "cam4.com", "camsoda.com",
+            "jerkmate.com", "imlive.com", "anyporn.com", "goodporn.to", "hqporner.com", 
+            "empflix.com", "tubev.com", "tubegalore.com", "faphouse.com", "yespornplease.com",
+            "pornflip.com", "pornhat.com", "hitomi.la", "nhentai.net", "fakku.net", 
+            "gelbooru.com", "sankakucomplex.com", "luscious.net", "porntrex.com", "letdoit.com",
+            "porncov.com", "babehub.com", "pornky.com", "3movs.com", "whoreshub.com",
+            "bangbros.com", "realitykings.com", "naughtyamerica.com", "mofos.com", "evilangel.com",
+            "onlyfans.com", "fansly.com", "manyvids.com", "modelhub.com", "adulttime.com"
     );
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-
-        prefs = getSharedPreferences("FocusSettings", Context.MODE_PRIVATE);
-        
-        long savedStartTime = prefs.getLong("serviceStartTime", 0);
-        if (savedStartTime == 0) {
-            serviceStartTime = System.currentTimeMillis();
-            prefs.edit().putLong("serviceStartTime", serviceStartTime).apply();
-        } else {
-            serviceStartTime = savedStartTime;
-        }
-
-        setupNotification();
-        loadSettingsFromMemory();
-
-        // অ্যান্ড্রয়েডের Garbage Collector যাতে লিসেনার মুছতে না পারে, তাই গ্লোবাল ভেরিয়েবলে রাখা হলো
-        prefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                loadSettingsFromMemory(); // UI থেকে ডেটা আসামাত্রই আপডেট হবে
-            }
-        };
-        prefs.registerOnSharedPreferenceChangeListener(prefsListener);
+        setupNotification(); // Anti-Freezer Shield On
 
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
-        info.flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS | AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
+        // FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY যুক্ত করা হলো ব্রাউজারের ভেতর আরও ডিপ স্ক্যানের জন্য
+        info.flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS | AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS | AccessibilityServiceInfo.FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY;
         this.setServiceInfo(info);
     }
 
-    private void loadSettingsFromMemory() {
-        isKwOn = prefs.getBoolean("blockKeywords", false);
-        isAdultOn = prefs.getBoolean("adultContent", false);
-        isShortsOn = prefs.getBoolean("blockReelsShorts", false);
-        
-        customKeywordsList.clear();
-        try {
-            String customKwJson = prefs.getString("customKeywordsList", "[]");
-            JSONArray jsonArray = new JSONArray(customKwJson);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                String word = jsonArray.getString(i).toLowerCase().trim();
-                if (!word.isEmpty()) customKeywordsList.add(word);
-            }
-        } catch (Exception ignored) {}
-    }
-
+    // Anti-Freezer Notification Logic
     private void setupNotification() {
-        String CHANNEL_ID = "RasFocus_Guard";
+        String CHANNEL_ID = "RasSilent_Guard_Ultra";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "RasFocus Persistent Guard", NotificationManager.IMPORTANCE_LOW);
+            // IMPORTANCE_HIGH সিস্টেমকে বোঝায় যে এই সার্ভিসটি কিল করা যাবে না
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "RasSilent Ultimate Blocker", NotificationManager.IMPORTANCE_HIGH);
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
-        
-        Runnable updateTimeRunnable = new Runnable() {
-            @Override
-            public void run() {
-                long diff = System.currentTimeMillis() - serviceStartTime;
-                long hours = diff / (1000 * 60 * 60);
-                long mins = (diff % (1000 * 60 * 60)) / (1000 * 60);
-                String timeText = hours + "h " + mins + "m";
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("RasSilent Guard is Active")
+                .setContentText("Ultimate Protection ON. No Escape Route.")
+                .setSmallIcon(android.R.drawable.ic_secure)
+                .setOngoing(true) 
+                .setPriority(NotificationCompat.PRIORITY_MAX) // হাই-প্রায়োরিটি, ফ্রিজার আটকাতে
+                .build();
+        startForeground(1005, notification);
+    }
 
-                Notification notification = new NotificationCompat.Builder(FocusAccessibilityService.this, CHANNEL_ID)
-                        .setContentTitle("RasFocus Pro is Active")
-                        .setContentText("Active Time: " + timeText)
-                        .setSmallIcon(android.R.drawable.ic_secure)
-                        .setOngoing(true) 
-                        .build();
-                
-                NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                nm.notify(1002, notification);
-                
-                mainHandler.postDelayed(this, 60000); 
-            }
-        };
-        mainHandler.post(updateTimeRunnable);
+    // সার্ভিস যদি কোনো কারণে রিস্টার্ট হয়, তবে যেন আঠার মতো লেগে থাকে
+    @Override
+    public int onStartCommand(android.content.Intent intent, int flags, int startId) {
+        return START_STICKY; 
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (!isKwOn && !isAdultOn && !isShortsOn) return;
-
         if (event.getPackageName() == null) return;
-        String packageName = event.getPackageName().toString();
+        String packageName = event.getPackageName().toString().toLowerCase();
 
-        // Uninstall Protection
-        if (packageName.equals("com.android.settings") && (isAdultOn || isKwOn)) {
-            showSafetyOverlay();
-            return;
-        }
+        backgroundExecutor.execute(() -> {
+            AccessibilityNodeInfo rootNode = getRootInActiveWindow();
+            if (rootNode == null) return;
 
-        AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-        if (rootNode == null) return;
+            boolean shouldBlock = false;
 
-        if (scanRecursive(rootNode, packageName)) {
-            showSafetyOverlay();
-        }
-        
-        rootNode.recycle();
+            // ===================================================================
+            // ১. THE ULTIMATE SELF-DEFENSE (Settings, Uninstall, Accessibility, Play Store, Launchers)
+            // ===================================================================
+            boolean isSystemOrStore = packageName.equals("com.android.settings") || 
+                                      packageName.equals("com.miui.securitycenter") || 
+                                      packageName.contains("packageinstaller") ||
+                                      packageName.equals("com.android.vending") || // Google Play Store
+                                      packageName.contains("launcher") || // All Launchers (Nova, Default, etc.)
+                                      packageName.contains("home") || // Some launchers use 'home' in package name
+                                      packageName.contains("sec.android.app"); // Samsung specific apps/launchers
+
+            if (isSystemOrStore) {
+                String fullScreenText = extractAllText(rootNode).toLowerCase();
+                
+                // অ্যাপের নাম স্ক্রিনে আছে কি না?
+                boolean isAppOnScreen = fullScreenText.contains("testapp") || 
+                                        fullScreenText.contains("rasfocus") || 
+                                        fullScreenText.contains("rassilent");
+                
+                // যদি ইউজার Settings, Play Store বা Launcher এ গিয়ে অ্যাপের নাম স্ক্রিনে আনে
+                // তাহলে সরাসরি ব্লক! (দরজা ভেতর থেকে লক)
+                if (isAppOnScreen) {
+                    shouldBlock = true;
+                }
+            }
+
+            // ===================================================================
+            // ২. PRE-EMPTIVE CONTENT & SHORTS/REELS SCANNING
+            // ===================================================================
+            if (!shouldBlock) {
+                shouldBlock = scanForAdultAndShorts(rootNode, packageName);
+            }
+            
+            if (shouldBlock) {
+                mainHandler.post(this::showSafetyOverlay);
+            }
+            rootNode.recycle();
+        });
     }
 
-    private boolean scanRecursive(AccessibilityNodeInfo node, String pkg) {
-        if (node == null) return false;
+    // পুরো স্ক্রিনের টেক্সট ম্যাজিকের মতো এক্সট্রাক্ট করা (Lightning Fast)
+    private String extractAllText(AccessibilityNodeInfo node) {
+        if (node == null) return "";
+        StringBuilder sb = new StringBuilder();
+        if (node.getText() != null) sb.append(node.getText().toString()).append(" ");
+        if (node.getContentDescription() != null) sb.append(node.getContentDescription().toString()).append(" ");
+        
+        for (int i = 0; i < node.getChildCount(); i++) {
+            sb.append(extractAllText(node.getChild(i)));
+        }
+        return sb.toString();
+    }
 
+    // অ্যাডাল্ট কন্টেন্ট এবং শর্টস চেক
+    private boolean scanForAdultAndShorts(AccessibilityNodeInfo node, String pkg) {
+        if (node == null) return false;
+        
         CharSequence text = node.getText();
         CharSequence desc = node.getContentDescription();
         String viewId = node.getViewIdResourceName();
@@ -171,35 +246,34 @@ public class FocusAccessibilityService extends AccessibilityService {
         String content = (text != null ? text.toString() : "") + " " + (desc != null ? desc.toString() : "");
         content = content.toLowerCase();
 
-        if (isAdultOn || isKwOn) {
-            for (String k : defaultAdultKeywords) {
-                if (content.contains(k)) return true;
-            }
+        // টাইপ শেষ করার আগেই ধরবে (No Regex, Pure Contains)
+        for (String k : hardcoreKeywords) {
+            if (content.contains(k)) return true;
+        }
+        for (String k : romanticKeywords) {
+            if (content.contains(k)) return true;
+        }
+        for (String k : adultWebsites) {
+            if (content.contains(k)) return true;
         }
 
-        if (isKwOn) {
-            for (String k : customKeywordsList) {
-                if (content.contains(k)) return true;
-            }
-        }
-
-        if (isShortsOn) {
-            if (pkg.contains("youtube") && (content.contains("shorts") || (viewId != null && viewId.contains("shorts")))) return true;
-            if (pkg.contains("facebook") && (content.contains("reels") || (viewId != null && viewId.contains("reel")))) return true;
-        }
+        // Shorts ও Reels ব্লক
+        if (pkg.contains("youtube") && (content.contains("shorts") || (viewId != null && viewId.contains("shorts")))) return true;
+        if (pkg.contains("facebook") && (content.contains("reels") || (viewId != null && viewId.contains("reel")))) return true;
 
         for (int i = 0; i < node.getChildCount(); i++) {
-            if (scanRecursive(node.getChild(i), pkg)) return true;
+            if (scanForAdultAndShorts(node.getChild(i), pkg)) return true;
         }
         return false;
     }
 
+    // ফ্লিকারিং-ফ্রি প্রফেশনাল হাদিস ওভারলে
     private void showSafetyOverlay() {
         if (isOverlayShowing) return;
         isOverlayShowing = true;
 
         mainHandler.post(() -> {
-            windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+            windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
             LinearLayout layout = new LinearLayout(this);
             layout.setBackgroundColor(Color.parseColor("#FB0F172A")); 
             layout.setOrientation(LinearLayout.VERTICAL);
@@ -225,15 +299,18 @@ public class FocusAccessibilityService extends AccessibilityService {
 
             try {
                 windowManager.addView(overlayView, params);
+                
+                // ওভারলে আসার সাথে সাথেই হোমে কিক (No flicker!)
                 performGlobalAction(GLOBAL_ACTION_HOME); 
                 
+                // ৫ সেকেন্ড পর হাদিস রিমুভ হবে
                 mainHandler.postDelayed(() -> {
                     if (overlayView != null) {
                         windowManager.removeView(overlayView);
                         overlayView = null;
                         isOverlayShowing = false;
                     }
-                }, 3500); 
+                }, 5000); 
             } catch (Exception e) { isOverlayShowing = false; }
         });
     }
@@ -241,9 +318,7 @@ public class FocusAccessibilityService extends AccessibilityService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (prefs != null && prefsListener != null) {
-            prefs.unregisterOnSharedPreferenceChangeListener(prefsListener);
-        }
+        backgroundExecutor.shutdown();
     }
 
     @Override public void onInterrupt() {}
