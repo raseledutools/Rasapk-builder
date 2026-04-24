@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>Local Image Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #1a1a1a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+        #viewer {
+            max-width: 90%;
+            max-height: 80vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: none;
+        }
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        input {
+            margin-bottom: 20px;
+        }
+        p { color: #aaa; font-size: 14px; }
+        span { font-weight: bold; color: #4CAF50; }
+    </style>
+</head>
+<body>
+
+    <h2>লোকাল ইমেজ ভিউয়ার</h2>
+    
+    <input type="file" id="fileInput" accept="image/*" multiple>
+    
+    <img id="viewer" src="" alt="Selected Image">
+
+    <div class="controls">
+        <p id="info">ফাইল সিলেক্ট করে কিবোর্ডের <span style="color: #ff9800;">← Left</span> এবং <span style="color: #ff9800;">Right →</span> অ্যারো ব্যবহার করুন।</p>
+        <p id="counter"></p>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const viewer = document.getElementById('viewer');
+        const counter = document.getElementById('counter');
+        let images = [];
+        let currentIndex = 0;
+
+        // ফাইল লোড করা
+        fileInput.onchange = function(e) {
+            images = Array.from(e.target.files);
+            if (images.length > 0) {
+                currentIndex = 0;
+                showImage(currentIndex);
+                viewer.style.display = "block";
+            }
+        };
+
+        // ইমেজ দেখানোর ফাংশন
+        function showImage(index) {
+            const file = images[index];
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                viewer.src = event.target.result;
+                counter.innerText = `ইমেজ: ${index + 1} / ${images.length}`;
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        // কিবোর্ড ইভেন্ট লিসেনার
+        document.addEventListener('keydown', function(event) {
+            if (images.length === 0) return;
+
+            if (event.key === "ArrowRight") {
+                // পরের ছবি
+                currentIndex = (currentIndex + 1) % images.length;
+                showImage(currentIndex);
+            } else if (event.key === "ArrowLeft") {
+                // আগের ছবি
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                showImage(currentIndex);
+            }
+        });
+    </script>
+
+</body>
+</html>

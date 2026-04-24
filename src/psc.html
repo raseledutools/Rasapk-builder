@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSC Preparation & Personal Notes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        night: '#121212', 
+                        nightCard: '#1e1e1e',
+                        nightBorder: '#333333',
+                        diaryBg: '#1a1a1e', 
+                        diarySidebar: '#232329',
+                        diaryText: '#e2e8f0', 
+                        diaryHighlight: '#f472b6' 
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        body:not(.dark) { background-color: #f0f4f8; }
+        .bengali-text { font-family: 'Noto Serif Bengali', serif; }
+        
+        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.3); }
+        .dark .glass-nav { background: rgba(30, 30, 30, 0.85); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .tab-btn { position: relative; transition: all 0.3s ease; }
+        
+        .diary-scroll::-webkit-scrollbar { width: 6px; }
+        .diary-scroll::-webkit-scrollbar-track { background: transparent; }
+        .diary-scroll::-webkit-scrollbar-thumb { background: #4a4a5a; border-radius: 10px; }
+        .diary-scroll::-webkit-scrollbar-thumb:hover { background: #6a6a7a; }
+
+        .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: #8b5cf6; animation: spin 1s linear infinite; }
+        .dark .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #a78bfa; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .book-reader { background-color: #fcf5e5; color: #2c2820; background-image: linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px); }
+        .dark .book-reader { background-color: #2d2d2d; color: #e5e7eb; background-image: none; }
+        .book-title { border-bottom: 2px dashed #d3c3a5; padding-bottom: 15px; margin-bottom: 25px; color: #8b0000; }
+        .dark .book-title { border-bottom: 2px dashed #555555; color: #fca5a5; text-shadow: none; }
+        #reader-content p { margin-bottom: 1.5rem; line-height: 1.85; }
+
+        .dark-bright-btn {
+            background: linear-gradient(145deg, #2a2a35, #111115);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid #444;
+            transition: all 0.3s ease;
+        }
+        .dark-bright-btn:hover {
+            box-shadow: 0 4px 20px rgba(244, 114, 182, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            border-color: #f472b6;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="text-gray-800 dark:text-gray-100 dark:bg-night h-screen flex flex-col">
+
+    <nav class="glass-nav shadow-sm z-10 sticky top-0">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="text-2xl font-bold flex items-center gap-2 text-blue-600 dark:text-blue-400 cursor-pointer select-none" onclick="window.openAdmin()">
+                    <i class="fa-solid fa-graduation-cap"></i> Ras Job centre(psc)
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle" class="text-gray-500 dark:text-yellow-400 hover:text-purple-600 dark:hover:text-yellow-300 focus:outline-none transition text-xl w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-nightCard shadow-inner">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    </button>
+                    <div class="md:hidden flex items-center">
+                        <button id="mobile-menu-btn" class="text-gray-500 dark:text-gray-300 hover:text-purple-600 focus:outline-none transition">
+                            <i class="fa-solid fa-bars text-2xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="nav-tabs" class="hidden md:flex flex-wrap justify-center gap-2 md:gap-3 pb-4 mt-2"></div>
+        </div>
+    </nav>
+
+    <main class="flex-grow p-4 md:p-8 overflow-y-auto w-full max-w-7xl mx-auto" id="main-content">
+        <div class="flex justify-center items-center h-full" id="global-loader">
+            <div class="spinner"></div>
+            <span class="ml-4 text-lg font-medium text-gray-500 dark:text-gray-400">Loading...</span>
+        </div>
+    </main>
+
+    <div id="reader-modal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 hidden flex flex-col opacity-0 backdrop-blur-sm">
+        <div class="bg-white dark:bg-[#252525] w-full h-full md:w-4/5 md:h-[90%] md:m-auto md:rounded-xl shadow-2xl flex flex-col overflow-hidden transform transition-transform duration-300 scale-95" id="reader-container">
+            <div class="bg-gray-800 dark:bg-nightCard text-white p-3 md:p-4 flex justify-between items-center shrink-0 shadow-md z-10">
+                <div class="flex items-center gap-2 text-gray-300">
+                    <i class="fa-solid fa-glasses text-purple-400"></i> <span class="hidden md:inline text-sm font-medium">রিডিং মুড / ভিউয়ার</span>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4">
+                    <div id="zoom-controls" class="bg-gray-700 dark:bg-night rounded-lg flex items-center px-1 py-1 shadow-inner border border-gray-600">
+                        <button onclick="zoomText(-1)" class="w-8 h-8 hover:bg-gray-600 flex justify-center items-center text-xl transition"><i class="fa-solid fa-minus text-sm"></i></button>
+                        <span class="px-3 text-sm font-bold select-none" id="zoom-level">100%</span>
+                        <button onclick="zoomText(1)" class="w-8 h-8 hover:bg-gray-600 flex justify-center items-center text-xl transition"><i class="fa-solid fa-plus text-sm"></i></button>
+                    </div>
+                    
+                    <a id="reader-pdf-btn" href="#" target="_blank" class="hidden bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-500 text-sm font-semibold transition items-center gap-2" title="সরাসরি ডাউনলোড">
+                        <i class="fa-solid fa-download"></i> 
+                    </a>
+                    <button onclick="history.back()" class="w-10 h-10 rounded-lg bg-gray-700 hover:bg-red-500 hover:text-white transition text-xl flex justify-center items-center">&times;</button>
+                </div>
+            </div>
+
+            
+
+                <div id="text-reader-container" class="max-w-3xl mx-auto w-full p-6 md:p-12 overflow-y-auto h-full pt-20">
+                    <h1 id="reader-title" class="text-3xl md:text-4xl font-bold book-title bengali-text text-center leading-snug">Title</h1>
+                    <div id="reader-content" class="text-lg md:text-xl font-medium bengali-text transition-all duration-300 text-justify"></div>
+                </div>
+
+                <iframe id="pdf-viewer-iframe" class="hidden w-full h-full border-0 bg-gray-100 dark:bg-night pt-16" allow="autoplay"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Offline First Service Worker Setup ---
+        const swCode = `
+            const CACHE_NAME = 'psc-portal-offline-v5';
+            const assetsToCache = [
+                location.href.split('?')[0]
+            ];
+
+            self.addEventListener('install', e => {
+                e.waitUntil(
+                    caches.open(CACHE_NAME).then(cache => {
+                        return cache.addAll(assetsToCache);
+                    })
+                );
+                self.skipWaiting();
+            });
+
+            self.addEventListener('activate', e => {
+                e.waitUntil(
+                    caches.keys().then(keys => {
+                        return Promise.all(keys.map(key => {
+                            if (key !== CACHE_NAME) return caches.delete(key);
+                        }));
+                    })
+                );
+                self.clients.claim();
+            });
+
+            self.addEventListener('fetch', e => {
+                const url = new URL(e.request.url);
+                if (url.hostname.includes('googleapis.com') || url.hostname.includes('firebase') || url.hostname.includes('cloudinary')) {
+                    return; // Skip API caching
+                }
+                
+                e.respondWith(
+                    caches.match(e.request).then(res => {
+                        return res || fetch(e.request).then(fetchRes => {
+                            return caches.open(CACHE_NAME).then(cache => {
+                                if(e.request.url.startsWith('http') && e.request.method === 'GET') {
+                                    cache.put(e.request, fetchRes.clone());
+                                }
+                                return fetchRes;
+                            });
+                        });
+                    }).catch(() => {
+                        if (e.request.mode === 'navigate') {
+                            return caches.match(location.href.split('?')[0]);
+                        }
+                    })
+                );
+            });
+        `;
+        const blob = new Blob([swCode], {type: 'application/javascript'});
+        const swUrl = URL.createObjectURL(blob);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(swUrl).catch(err => console.log('SW registration failed:', err));
+        }
+
+        // Theme Setup
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            if(document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark'); themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                localStorage.setItem('theme', 'light'); themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        });
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53",
+            storageBucket: "mywebtools-f8d53.firebasestorage.app"
+        };
+        const SYNC_APP_ID = "rasel-mia-universal-sync";
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload";
+        const CLOUDINARY_PRESET = "ml_default";
+
+        const categories = {
+            bangla: { label: "বাংলা", icon: "fa-language text-green-500", subs: ["প্রবন্ধ", "ভাব সম্প্রসারণ", "পত্র ও দরখাস্ত", "সারাংশ ও সারমর্ম", "অনুবাদ", "ব্যাকরণ"] },
+            english: { label: "English", icon: "fa-a text-blue-500", subs: ["Essay", "Letter & Application", "Passage", "Grammar", "Paragraph"] },
+            bd_affairs: { label: "বাংলাদেশ বিষয়াবলি", icon: "fa-map-location-dot text-red-500", subs: ["সাধারণ জ্ঞান", "ইতিহাস", "ভূগোল"] },
+            int_affairs: { label: "আন্তর্জাতিক বিষয়াবলি", icon: "fa-earth-americas text-teal-500", subs: ["সাধারণ জ্ঞান", "সংস্থা ও চুক্তি"] },
+            science_ict: { label: "বিজ্ঞান ও প্রযুক্তি", icon: "fa-microchip text-indigo-500", subs: ["সাধারণ বিজ্ঞান", "কম্পিউটার ও তথ্যপ্রযুক্তি"] },
+            eee: { label: "EEE ডিপার্টমেন্ট", icon: "fa-bolt text-yellow-500", subs: ["Electrical", "Electronics", "Telecommunication"] }
+        };
+
+        let currentTab = 'diary'; 
+        let currentSub = '';
+        let allData = [];
+        let userAuth = null;
+        let isAdminLoggedIn = false;
+        
+        let activeDiaryId = null;
+        let saveTimeout = null;
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = initializeFirestore(app, { localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}) });
+
+        const navTabs = document.getElementById('nav-tabs');
+        const mainContent = document.getElementById('main-content');
+        
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => navTabs.classList.toggle('hidden'));
+
+        async function init() {
+            // FIX: Initial history state injection for physical back button support
+            if (!history.state) {
+                history.replaceState({ tab: 'diary', sub: '', diaryId: activeDiaryId, readerOpen: false, pdfViewer: false }, "", "");
+            }
+            
+            window.addEventListener('popstate', (e) => {
+                if (e.state) {
+                    currentTab = e.state.tab || 'diary';
+                    currentSub = e.state.sub || '';
+                    if (e.state.diaryId) activeDiaryId = e.state.diaryId;
+
+                    renderNavigation();
+                    if (e.state.pdfViewer && e.state.url) {
+                        openPdfViewerUI(e.state.url, e.state.title);
+                    }
+                    else if (e.state.readerOpen && e.state.item) {
+                        openReaderUI(e.state.item, currentTab !== 'english');
+                    } else {
+                        hideReaderModal();
+                        renderContent();
+                    }
+                } else {
+                    hideReaderModal();
+                }
+            });
+
+            try {
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, (user) => {
+                    if (user) { userAuth = user; fetchData(); renderNavigation(); renderContent(); }
+                });
+            } catch (error) {
+                console.error("Auth error:", error);
+                mainContent.innerHTML = `<div class="text-red-500 text-center mt-10">Authentication failed. Check internet connection.</div>`;
+            }
+        }
+
+        window.fetchData = function() {
+            if (!userAuth) return;
+            const dataRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'psc_materials');
+            onSnapshot(dataRef, (snapshot) => {
+                allData = [];
+                snapshot.forEach((doc) => { allData.push({ id: doc.id, ...doc.data() }); });
+                allData.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+                if (currentTab !== 'diary' && currentTab !== 'admin') renderContent();
+            });
+        }
+
+        window.openAdmin = function() {
+            currentTab = 'admin'; currentSub = ''; 
+            history.pushState({ tab: 'admin', sub: '', readerOpen: false }, "", "");
+            renderNavigation(); renderContent();
+        }
+
+        function renderNavigation() {
+            navTabs.innerHTML = '';
+            
+            const diaryBtn = document.createElement('button');
+            diaryBtn.className = `tab-btn py-2 px-3 md:py-2.5 md:px-5 rounded-xl text-sm md:text-base focus:outline-none flex items-center justify-center gap-2 transition-all font-bold shadow-sm border flex-grow sm:flex-grow-0 ${currentTab === 'diary' ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white border-transparent' : 'bg-white dark:bg-nightCard text-pink-600 dark:text-pink-400 border-gray-200 dark:border-nightBorder hover:bg-gray-100 dark:hover:bg-gray-700'}`;
+            diaryBtn.innerHTML = '<i class="fa-solid fa-book-sparkles"></i> <span class="bengali-text">পার্সোনাল নোট</span>';
+            diaryBtn.onclick = () => { 
+                currentTab = 'diary'; currentSub = ''; 
+                history.pushState({ tab: 'diary', sub: '', diaryId: activeDiaryId, readerOpen: false }, "", "");
+                renderNavigation(); renderContent(); 
+                if(window.innerWidth < 768) navTabs.classList.add('hidden');
+            };
+            navTabs.appendChild(diaryBtn);
+
+            Object.keys(categories).forEach(catKey => {
+                const btn = document.createElement('button');
+                btn.className = `tab-btn py-2 px-3 md:py-2.5 md:px-5 rounded-xl text-sm md:text-base focus:outline-none flex items-center justify-center gap-2 transition-all font-semibold shadow-sm border flex-grow sm:flex-grow-0 ${currentTab === catKey ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-nightCard text-gray-700 dark:text-gray-200 border-gray-200 dark:border-nightBorder hover:bg-gray-100 dark:hover:bg-gray-700'}`;
+                btn.innerHTML = `<i class="fa-solid ${categories[catKey].icon} ${currentTab === catKey ? 'text-white' : ''}"></i> <span class="${catKey !== 'english' ? 'bengali-text font-medium' : ''}">${categories[catKey].label}</span>`;
+                btn.onclick = () => { 
+                    currentTab = catKey; currentSub = ''; 
+                    history.pushState({ tab: catKey, sub: '', readerOpen: false }, "", "");
+                    renderNavigation(); renderContent(); 
+                    if(window.innerWidth < 768) navTabs.classList.add('hidden');
+                };
+                navTabs.appendChild(btn);
+            });
+        }
+
+        function renderContent() {
+            mainContent.innerHTML = ''; 
+
+            if (currentTab === 'diary') { renderPremiumDiary(); return; }
+            if (currentTab === 'admin') { isAdminLoggedIn ? renderAdminPanel() : renderAdminLogin(); return; }
+
+            const catData = categories[currentTab];
+            const isBengali = currentTab !== 'english';
+            
+            const header = document.createElement('h1');
+            header.className = `text-3xl md:text-4xl font-bold mb-8 text-blue-700 dark:text-blue-400 border-b-2 border-gray-200 dark:border-nightBorder pb-3 flex items-center gap-3 w-fit ${isBengali ? 'bengali-text' : ''}`;
+            header.innerHTML = `<i class="fa-solid ${catData.icon}"></i> ${catData.label}`;
+            mainContent.appendChild(header);
+
+            if (currentSub === '') {
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
+                const cardColors = ['bg-blue-600 hover:bg-blue-700', 'bg-emerald-600 hover:bg-emerald-700', 'bg-rose-600 hover:bg-rose-700', 'bg-violet-600 hover:bg-violet-700', 'bg-amber-600 hover:bg-amber-700', 'bg-cyan-600 hover:bg-cyan-700', 'bg-pink-600 hover:bg-pink-700', 'bg-teal-600 hover:bg-teal-700'];
+                
+                catData.subs.forEach((sub, index) => {
+                    const colorClass = cardColors[index % cardColors.length];
+                    const count = allData.filter(d => d.mainCategory === currentTab && d.subCategory === sub).length;
+
+                    const card = document.createElement('div');
+                    card.className = `${colorClass} p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between transform hover:-translate-y-1 relative overflow-hidden text-white`;
+                    card.onclick = () => { 
+                        currentSub = sub; 
+                        history.pushState({ tab: currentTab, sub: currentSub, readerOpen: false }, "", "");
+                        renderContent(); 
+                    };
+                    card.innerHTML = `
+                        <div class="relative z-10 flex justify-between items-start">
+                            <h3 class="text-xl font-bold ${isBengali ? 'bengali-text' : ''}">${sub}</h3>
+                            <span class="bg-black/20 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">${count} টি</span>
+                        </div>
+                        <div class="mt-6 text-white/70 text-right"><i class="fa-solid fa-arrow-right-long text-xl"></i></div>
+                    `;
+                    grid.appendChild(card);
+                });
+                mainContent.appendChild(grid);
+            } else {
+                const backBtn = document.createElement('button');
+                backBtn.className = `mb-6 text-white font-bold flex items-center gap-2 transition bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl w-fit shadow-md ${isBengali ? 'bengali-text' : ''}`;
+                backBtn.innerHTML = `<i class="fa-solid fa-arrow-left"></i> ফিরে যান`;
+                backBtn.onclick = () => { currentSub = ''; history.pushState({ tab: currentTab, sub: currentSub, readerOpen: false }, "", ""); renderContent(); };
+                mainContent.appendChild(backBtn);
+
+                const subHeader = document.createElement('h2');
+                subHeader.className = `text-2xl font-bold mb-6 text-blue-800 dark:text-blue-300 bg-white dark:bg-nightCard p-4 rounded-xl shadow-sm border-l-4 border-blue-500 ${isBengali ? 'bengali-text' : ''}`;
+                subHeader.innerText = currentSub;
+                mainContent.appendChild(subHeader);
+
+                const items = allData.filter(d => d.mainCategory === currentTab && d.subCategory === currentSub);
+                
+                if (items.length === 0) {
+                    mainContent.innerHTML += `<div class="p-10 bg-white dark:bg-nightCard rounded-xl text-center bengali-text text-lg dark:text-gray-400">কোনো তথ্য নেই।</div>`;
+                    return;
+                }
+
+                const handNotes = items.filter(d => d.itemType === 'handnote');
+                const regularNotes = items.filter(d => d.itemType !== 'handnote');
+
+                if(handNotes.length > 0) {
+                    const hnTitle = document.createElement('h3');
+                    hnTitle.className = `text-xl font-bold mt-2 mb-4 text-pink-600 dark:text-pink-400 flex items-center gap-2 ${isBengali ? 'bengali-text' : ''}`;
+                    hnTitle.innerHTML = `<i class="fa-solid fa-fire text-orange-500"></i> Hand Notes & Hacks`;
+                    mainContent.appendChild(hnTitle);
+
+                    const hnGrid = document.createElement('div');
+                    hnGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-8';
+
+                    handNotes.forEach(item => {
+                        const hnCard = document.createElement('div');
+                        hnCard.className = `bg-gradient-to-r from-pink-500 to-rose-500 p-5 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between group transform hover:-translate-y-1`;
+                        const fileLink = item.driveLink || item.pdfUrl || '';
+                        
+                        hnCard.onclick = () => window.triggerPdfViewer(fileLink, item.title);
+                        
+                        hnCard.innerHTML = `
+                            <div class="flex items-start gap-4 mb-4">
+                                <div class="bg-white/20 p-3 rounded-xl shrink-0"><i class="fa-solid fa-bolt text-yellow-300 text-xl"></i></div>
+                                <div>
+                                    <div class="text-xs text-pink-100 font-bold tracking-wider mb-1">HAND NOTE / HACKS</div>
+                                    <h4 class="text-white font-bold text-lg leading-tight ${isBengali ? 'bengali-text' : ''}">${item.title}</h4>
+                                </div>
+                            </div>
+                            <div class="bg-white/90 text-rose-600 text-center py-2.5 rounded-xl font-bold shadow-sm group-hover:bg-white transition-colors flex justify-center items-center gap-2 ${isBengali ? 'bengali-text' : ''}">
+                                <i class="fa-regular fa-folder-open"></i> ফাইলটি খুলুন
+                            </div>
+                        `;
+                        hnGrid.appendChild(hnCard);
+                    });
+                    mainContent.appendChild(hnGrid);
+                }
+
+                if(regularNotes.length > 0) {
+                    if(handNotes.length > 0) {
+                        const rnTitle = document.createElement('h3');
+                        rnTitle.className = `text-xl font-bold mt-6 mb-4 text-blue-600 dark:text-blue-400 flex items-center gap-2 ${isBengali ? 'bengali-text' : ''}`;
+                        rnTitle.innerHTML = `<i class="fa-solid fa-book-open"></i> সাধারণ নোটসমূহ`;
+                        mainContent.appendChild(rnTitle);
+                    }
+
+                    const listContainer = document.createElement('div');
+                    listContainer.className = 'space-y-4';
+                    const listColors = ['bg-blue-600 hover:bg-blue-700', 'bg-emerald-600 hover:bg-emerald-700', 'bg-violet-600 hover:bg-violet-700', 'bg-amber-600 hover:bg-amber-700', 'bg-cyan-600 hover:bg-cyan-700'];
+
+                    regularNotes.forEach((item, index) => {
+                        const colorClass = listColors[index % listColors.length];
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = `${colorClass} p-5 rounded-2xl shadow-md hover:shadow-xl flex flex-col md:flex-row md:justify-between md:items-center transition-all group cursor-pointer transform hover:-translate-y-1`;
+                        
+                        const titleDiv = document.createElement('div');
+                        titleDiv.className = `font-bold text-white text-xl flex-grow mb-4 md:mb-0 ${isBengali ? 'bengali-text' : ''}`;
+                        titleDiv.innerHTML = `<i class="fa-solid fa-file-lines text-white/70 mr-3"></i> ${item.title}`;
+                        titleDiv.onclick = () => window.openReaderById(item.id, isBengali);
+                        
+                        const iconsDiv = document.createElement('div');
+                        iconsDiv.className = 'flex flex-wrap gap-3 text-sm items-center';
+                        
+                        if(item.content) {
+                            const readBtn = document.createElement('button');
+                            readBtn.className = "bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition shadow-sm";
+                            readBtn.innerHTML = '<i class="fa-solid fa-book-open"></i> পড়ুন';
+                            readBtn.onclick = () => window.openReaderById(item.id, isBengali);
+                            iconsDiv.appendChild(readBtn);
+                        }
+                        if(item.pdfUrl || item.driveLink) {
+                            const finalLink = item.driveLink || item.pdfUrl;
+                            const pdfBtn = document.createElement('button');
+                            pdfBtn.className = "bg-black/30 text-white border border-black/20 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-black/40 transition shadow-sm";
+                            pdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> PDF';
+                            pdfBtn.onclick = (e) => { e.stopPropagation(); window.triggerPdfViewer(finalLink, item.title); };
+                            iconsDiv.appendChild(pdfBtn);
+                        }
+
+                        itemDiv.appendChild(titleDiv);
+                        itemDiv.appendChild(iconsDiv);
+                        listContainer.appendChild(itemDiv);
+                    });
+                    mainContent.appendChild(listContainer);
+                }
+            }
+        }
+
+        // ==========================================
+        //         PERSONAL NOTE LOGIC
+        // ==========================================
+        function getDiaryData() { return JSON.parse(localStorage.getItem('premium_local_diary') || '[]'); }
+        function saveDiaryData(data) { localStorage.setItem('premium_local_diary', JSON.stringify(data)); }
+        function getTodayDateString() { return new Date().toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' }); }
+        function getTodaySortKey() { const today = new Date(); return `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`; }
+
+        window.showPreviousNotes = function() {
+            document.getElementById('note-sidebar').classList.remove('hidden');
+            document.getElementById('note-sidebar').classList.add('flex');
+            document.getElementById('note-editor').classList.add('hidden');
+        }
+
+        window.hidePreviousNotes = function() {
+            document.getElementById('note-sidebar').classList.add('hidden');
+            document.getElementById('note-sidebar').classList.remove('flex');
+            document.getElementById('note-editor').classList.remove('hidden');
+        }
+
+        function renderPremiumDiary() {
+            let diaryData = getDiaryData();
+            const todayKey = getTodaySortKey();
+            
+            let todayEntry = diaryData.find(d => d.dateKey === todayKey);
+            if (!todayEntry) {
+                todayEntry = { id: 'diary_' + Date.now(), dateKey: todayKey, displayDate: getTodayDateString(), subject: '', topic: '', details: '', timestamp: Date.now() };
+                diaryData.unshift(todayEntry);
+                saveDiaryData(diaryData);
+            }
+            if(!activeDiaryId) activeDiaryId = todayEntry.id;
+            const activeEntry = diaryData.find(d => d.id === activeDiaryId) || todayEntry;
+
+            const html = `
+                <div class="flex flex-col md:flex-row min-h-[70vh] md:h-[82vh] bg-diaryBg rounded-3xl overflow-hidden shadow-2xl border border-diarySidebar relative">
+                    
+                    <div id="note-sidebar" class="hidden md:flex w-full md:w-1/3 md:max-w-xs bg-diarySidebar flex-col border-r border-nightBorder/50 h-full shrink-0 z-20 absolute md:relative">
+                        <div class="p-4 border-b border-nightBorder/50 flex justify-between items-center bg-black/20 shrink-0">
+                            <h2 class="text-white font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-list text-diaryHighlight"></i> All Notes</h2>
+                            <button onclick="window.hidePreviousNotes()" class="md:hidden text-white bg-red-500 hover:bg-red-600 w-8 h-8 rounded-full flex justify-center items-center"><i class="fa-solid fa-times"></i></button>
+                        </div>
+                        <div class="flex-grow overflow-y-auto diary-scroll p-3 space-y-2" id="diary-list-container">
+                            ${diaryData.map(item => `
+                                <div onclick="window.loadDiary('${item.id}')" class="cursor-pointer p-3 rounded-xl transition-all duration-300 border ${item.id === activeDiaryId ? 'bg-diaryBg border-diaryHighlight/50 shadow-md' : 'bg-transparent border-transparent hover:bg-white/5'} flex flex-col gap-1 group relative">
+                                    <span class="text-xs text-gray-400 font-medium bengali-text"><i class="fa-regular fa-calendar text-diaryHighlight/70"></i> ${item.displayDate}</span>
+                                    <span class="text-sm font-bold text-diaryText truncate">${item.subject || 'No Subject'} - ${item.topic || 'No Topic'}</span>
+                                    <button onclick="event.stopPropagation(); window.deleteDiary('${item.id}')" class="absolute right-3 top-3 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div id="note-editor" class="w-full md:w-2/3 flex flex-col relative bg-gradient-to-br from-diaryBg to-[#111115] flex-grow">
+                        <div class="absolute top-4 right-6 flex items-center gap-2 z-10">
+                            <span id="save-status" class="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full opacity-0 transition-opacity duration-300"><i class="fa-solid fa-check-circle"></i> Saved</span>
+                        </div>
+                        
+                        <div class="p-6 md:p-10 flex-grow flex flex-col h-full overflow-y-auto diary-scroll">
+                            
+                            <div class="flex justify-between items-center mb-5 border-b border-nightBorder/50 pb-3 flex-wrap gap-2">
+                                <button onclick="window.showPreviousNotes()" class="md:hidden bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow flex items-center gap-2"><i class="fa-solid fa-folder-open"></i> Previous Notes</button>
+                                <button onclick="window.createNewDiary()" class="bg-diaryHighlight hover:bg-pink-500 text-white px-4 py-2 rounded-xl text-sm font-bold shadow flex items-center gap-2"><i class="fa-solid fa-plus"></i> New Note</button>
+                            </div>
+                            
+                            <div class="space-y-4 flex-grow flex flex-col">
+                                <div>
+                                    <label class="text-xs font-bold text-diaryHighlight/80 uppercase tracking-wider">Subject</label>
+                                    <input type="text" id="note-subject" value="${activeEntry.subject || ''}" class="w-full bg-transparent text-xl font-bold text-diaryText outline-none border-b border-nightBorder/50 focus:border-diaryHighlight/50 pb-2 transition-colors" placeholder="Enter Subject..." oninput="window.triggerDiarySave()">
+                                </div>
+                                
+                                <div>
+                                    <label class="text-xs font-bold text-diaryHighlight/80 uppercase tracking-wider">Topic</label>
+                                    <input type="text" id="note-topic" value="${activeEntry.topic || ''}" class="w-full bg-transparent text-lg font-bold text-gray-300 outline-none border-b border-nightBorder/50 focus:border-diaryHighlight/50 pb-2 transition-colors" placeholder="Enter Topic..." oninput="window.triggerDiarySave()">
+                                </div>
+                                
+                                <div class="flex-grow flex flex-col mt-4">
+                                    <label class="text-xs font-bold text-diaryHighlight/80 uppercase tracking-wider mb-2">Details</label>
+                                    <textarea id="note-details" class="w-full flex-grow bg-transparent text-base md:text-lg text-gray-300 outline-none resize-none placeholder-gray-600/70 leading-[2] overflow-hidden" style="min-height: 40vh;" placeholder="Write your note details here..." oninput="window.triggerDiarySave(); this.style.height='auto'; this.style.height=this.scrollHeight+'px';">${activeEntry.details || ''}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            mainContent.innerHTML = html;
+            setTimeout(() => { const ta = document.getElementById('note-details'); if(ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; } }, 50);
+        }
+
+        window.loadDiary = function(id, pushState = true) { 
+            activeDiaryId = id; 
+            if (pushState) history.pushState({ tab: 'diary', sub: '', diaryId: id, readerOpen: false }, "", ""); 
+            renderPremiumDiary(); 
+            if(window.innerWidth < 768) window.hidePreviousNotes();
+        }
+
+        window.createNewDiary = function() { 
+            const newId = 'diary_' + Date.now(); 
+            let diaryData = getDiaryData(); 
+            diaryData.unshift({ id: newId, dateKey: Date.now().toString(), displayDate: getTodayDateString(), subject: '', topic: '', details: '', timestamp: Date.now() }); 
+            saveDiaryData(diaryData); 
+            window.loadDiary(newId); 
+        }
+
+        window.triggerDiarySave = function() {
+            const status = document.getElementById('save-status');
+            status.innerHTML = '<i class="fa-solid fa-pen-nib animate-pulse"></i> Saving...'; status.style.opacity = '1';
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                let diaryData = getDiaryData();
+                const index = diaryData.findIndex(d => d.id === activeDiaryId);
+                if(index !== -1) {
+                    diaryData[index].subject = document.getElementById('note-subject').value;
+                    diaryData[index].topic = document.getElementById('note-topic').value;
+                    diaryData[index].details = document.getElementById('note-details').value;
+                    saveDiaryData(diaryData);
+                    document.getElementById('diary-list-container').innerHTML = diaryData.map(item => `
+                        <div onclick="window.loadDiary('${item.id}')" class="cursor-pointer p-3 rounded-xl transition-all duration-300 border ${item.id === activeDiaryId ? 'bg-diaryBg border-diaryHighlight/50 shadow-md' : 'bg-transparent border-transparent hover:bg-white/5'} flex flex-col gap-1 group relative">
+                            <span class="text-xs text-gray-400 font-medium bengali-text"><i class="fa-regular fa-calendar text-diaryHighlight/70"></i> ${item.displayDate}</span>
+                            <span class="text-sm font-bold text-diaryText truncate">${item.subject || 'No Subject'} - ${item.topic || 'No Topic'}</span>
+                            <button onclick="event.stopPropagation(); window.deleteDiary('${item.id}')" class="absolute right-3 top-3 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    `).join('');
+                }
+                status.innerHTML = '<i class="fa-solid fa-check-double"></i> Saved';
+                setTimeout(() => { status.style.opacity = '0'; }, 2000);
+            }, 800); 
+        }
+
+        window.deleteDiary = function(id) { if(confirm('Are you sure you want to delete this note?')) { let diaryData = getDiaryData(); diaryData = diaryData.filter(d => d.id !== id); saveDiaryData(diaryData); if(activeDiaryId === id) activeDiaryId = null; renderPremiumDiary(); } }
+
+        // ==========================================
+        //         ADMIN PANEL
+        // ==========================================
+        function renderAdminLogin() {
+            mainContent.innerHTML = `
+                <div class="max-w-md mx-auto bg-white dark:bg-nightCard p-8 rounded-2xl shadow-xl mt-10 text-center border-t-4 border-blue-600">
+                    <h2 class="text-2xl font-bold mb-4 bengali-text dark:text-white">অ্যাডমিন প্যানেল</h2>
+                    <input type="password" id="admin-pass" placeholder="পাসওয়ার্ড..." class="w-full border-2 border-gray-200 dark:border-nightBorder rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none text-center tracking-widest mb-4 bg-gray-50 dark:bg-night dark:text-white">
+                    <button onclick="window.checkAdminPass()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl bengali-text">লগইন করুন</button>
+                    <p id="admin-error" class="text-red-500 mt-4 hidden bengali-text">পাসওয়ার্ড ভুল!</p>
+                </div>
+            `;
+        }
+
+        window.checkAdminPass = function() { if(document.getElementById('admin-pass').value === '7284') { isAdminLoggedIn = true; renderAdminPanel(); } else { document.getElementById('admin-error').classList.remove('hidden'); } };
+        window.logoutAdmin = function() { isAdminLoggedIn = false; currentTab = 'diary'; history.pushState({ tab: 'diary', sub: '', readerOpen: false }, "", ""); renderNavigation(); renderContent(); }
+
+        function renderAdminPanel() {
+            mainContent.innerHTML = `
+                <div class="max-w-4xl mx-auto space-y-8">
+                    <div class="bg-white dark:bg-nightCard p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-nightBorder">
+                        <div class="flex justify-between items-center mb-8 border-b-2 border-gray-100 dark:border-nightBorder pb-4">
+                            <h2 class="text-2xl font-bold text-blue-700 dark:text-blue-400 bengali-text"><i class="fa-solid fa-cloud-arrow-up"></i> নতুন ডাটা যুক্ত করুন</h2>
+                            <button onclick="window.logoutAdmin()" class="text-white bg-red-500 px-4 py-2 rounded-lg bengali-text"><i class="fa-solid fa-power-off"></i> লগআউট</button>
+                        </div>
+                        <form id="admin-form" class="space-y-6 bengali-text">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
+                                <label class="block font-bold mb-2 text-blue-800 dark:text-blue-300">ডাটার ধরণ নির্বাচন করুন:</label>
+                                <select id="admin-item-type" class="w-full border-2 border-blue-200 dark:border-blue-700 rounded-xl p-3 bg-white dark:bg-night dark:text-white font-semibold">
+                                    <option value="regular">সাধারণ নোট (Text View / PDF)</option>
+                                    <option value="handnote">🔥 হ্যান্ড নোট ও হ্যাকস (Direct Drive/PDF Link)</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <select id="admin-main-cat" required class="w-full border-2 border-gray-200 dark:border-nightBorder rounded-xl p-3 bg-gray-50 dark:bg-night dark:text-white">
+                                    <option value="">মূল ক্যাটাগরি...</option>
+                                    ${Object.keys(categories).map(k => `<option value="${k}">${categories[k].label}</option>`).join('')}
+                                </select>
+                                <select id="admin-sub-cat" required class="w-full border-2 border-gray-200 dark:border-nightBorder rounded-xl p-3 bg-gray-50 dark:bg-night dark:text-white">
+                                    <option value="">সাব-ক্যাটাগরি...</option>
+                                </select>
+                            </div>
+                            <input type="text" id="admin-title" required placeholder="ফাইলের নাম বা শিরোনাম (যা ইউজার দেখবে)..." class="w-full border-2 border-gray-200 dark:border-nightBorder rounded-xl p-3 bg-gray-50 dark:bg-night dark:text-white">
+                            <textarea id="admin-content" rows="4" placeholder="বিস্তারিত লেখা (শুধুমাত্র 'সাধারণ নোট'-এর ক্ষেত্রে কাজে লাগবে)..." class="w-full border-2 border-gray-200 dark:border-nightBorder rounded-xl p-4 bg-gray-50 dark:bg-night dark:text-white"></textarea>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="border-2 border-dashed border-pink-200 rounded-xl p-4 bg-pink-50 dark:bg-pink-900/10">
+                                    <label class="block font-semibold mb-2 text-pink-700 dark:text-pink-300"><i class="fa-brands fa-google-drive"></i> গুগল ড্রাইভ লিংক</label>
+                                    <input type="url" id="admin-drive-link" placeholder="লিংক পেস্ট করুন..." class="w-full p-2 border border-pink-200 rounded-lg dark:bg-night dark:text-white text-sm">
+                                </div>
+                                <div class="border-2 border-dashed border-blue-200 rounded-xl p-4 bg-blue-50 dark:bg-blue-900/10">
+                                    <label class="block font-semibold mb-2 text-blue-700 dark:text-blue-300"><i class="fa-solid fa-file-pdf"></i> সরাসরি PDF আপলোড</label>
+                                    <input type="file" id="admin-pdf" accept=".pdf" class="w-full text-sm dark:text-gray-400">
+                                </div>
+                            </div>
+                            <button type="submit" id="admin-submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg"><i class="fa-solid fa-paper-plane"></i> সেভ করুন</button>
+                            <p id="admin-status" class="text-center font-bold mt-2 hidden"></p>
+                        </form>
+                    </div>
+
+                    <div class="bg-white dark:bg-nightCard p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-nightBorder">
+                        <h2 class="text-2xl font-bold text-red-600 dark:text-red-400 bengali-text mb-4"><i class="fa-solid fa-trash-can"></i> ডাটা ডিলিট প্যানেল</h2>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-night text-sm border-b dark:border-nightBorder dark:text-gray-300">
+                                        <th class="p-4 bengali-text">শিরোনাম</th>
+                                        <th class="p-4 bengali-text">ধরণ</th>
+                                        <th class="p-4 bengali-text">অ্যাকশন</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${allData.map(item => `
+                                        <tr class="border-b dark:border-nightBorder hover:bg-gray-50 dark:hover:bg-night/50">
+                                            <td class="p-4 bengali-text dark:text-gray-200">${item.title}</td>
+                                            <td class="p-4 text-xs font-bold text-gray-500 dark:text-gray-400">${item.itemType === 'handnote' ? '<span class="bg-pink-100 text-pink-600 px-2 py-1 rounded">Hand Note</span>' : '<span class="bg-blue-100 text-blue-600 px-2 py-1 rounded">Regular</span>'}</td>
+                                            <td class="p-4">
+                                                <button onclick="window.deleteDataItem('${item.id}')" class="text-red-500 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded bengali-text"><i class="fa-solid fa-trash"></i> ডিলিট</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('admin-main-cat').addEventListener('change', (e) => {
+                const subSel = document.getElementById('admin-sub-cat'); subSel.innerHTML = '';
+                if(categories[e.target.value]) { categories[e.target.value].subs.forEach(sub => { subSel.innerHTML += `<option value="${sub}">${sub}</option>`; }); }
+            });
+
+            document.getElementById('admin-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('admin-submit-btn'); const status = document.getElementById('admin-status'); const fileInput = document.getElementById('admin-pdf');
+                btn.disabled = true; btn.innerText = "প্রসেস হচ্ছে...";
+                try {
+                    let pdfUrl = '';
+                    if (fileInput.files.length > 0) {
+                        status.className = "text-center font-bold mt-2 text-blue-500 block"; status.innerText = "পিডিএফ আপলোড হচ্ছে...";
+                        const formData = new FormData(); formData.append('file', fileInput.files[0]); formData.append('upload_preset', CLOUDINARY_PRESET);
+                        const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                        if (!res.ok) throw new Error("Cloudinary upload failed");
+                        pdfUrl = (await res.json()).secure_url;
+                    }
+                    status.innerText = "ডাটাবেসে সেভ হচ্ছে...";
+                    await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'psc_materials'), {
+                        itemType: document.getElementById('admin-item-type').value,
+                        mainCategory: document.getElementById('admin-main-cat').value,
+                        subCategory: document.getElementById('admin-sub-cat').value,
+                        title: document.getElementById('admin-title').value,
+                        content: document.getElementById('admin-content').value,
+                        driveLink: document.getElementById('admin-drive-link').value,
+                        pdfUrl: pdfUrl,
+                        createdAt: serverTimestamp()
+                    });
+                    status.className = "text-center font-bold mt-2 text-green-500 block"; status.innerText = "সফলভাবে ফায়ারবেসে সেভ হয়েছে!";
+                    document.getElementById('admin-form').reset(); setTimeout(() => renderAdminPanel(), 1000);
+                } catch(err) { status.className = "text-center font-bold mt-2 text-red-500 block"; status.innerText = "ত্রুটি: " + err.message; }
+                btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> সেভ করুন'; setTimeout(() => status.classList.add('hidden'), 4000);
+            });
+        }
+
+        window.deleteDataItem = async function(id) { if(confirm(`আপনি কি সত্যিই এটি মুছে ফেলতে চান?`)) { await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'psc_materials', id)); setTimeout(() => { if(isAdminLoggedIn) renderAdminPanel(); }, 500); } }
+
+        // ==========================================
+        //         Reader & PDF Viewer Auto Helper
+        // ==========================================
+        let currentZoom = 100;
+        window.zoomText = function(step) {
+            currentZoom += (step * 10);
+            if(currentZoom < 70) currentZoom = 70; if(currentZoom > 200) currentZoom = 200; 
+            document.getElementById('zoom-level').innerText = currentZoom + '%';
+            document.getElementById('reader-content').style.fontSize = (1.125 * currentZoom / 100) + 'rem';
+            document.getElementById('reader-title').style.fontSize = (2.25 * currentZoom / 100) + 'rem';
+        };
+
+        function getEmbeddablePdfUrl(url) {
+            if (!url) return '';
+            if (url.includes('drive.google.com/file/d/')) {
+                const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) { return `https://drive.google.com/file/d/${match[1]}/preview`; }
+            } else if (url.endsWith('.pdf')) {
+                return `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+            }
+            return url;
+        }
+
+        window.triggerPdfViewer = function(url, title) {
+            history.pushState({ tab: currentTab, sub: currentSub, pdfViewer: true, url: url, title: title }, "", "");
+            openPdfViewerUI(url, title);
+        }
+
+        window.openPdfViewerUI = function(url, title) {
+            const modal = document.getElementById('reader-modal');
+            document.getElementById('reader-title').innerText = title || "PDF Viewer";
+            
+            document.getElementById('text-reader-container').classList.add('hidden');
+            document.getElementById('zoom-controls').classList.add('hidden');
+            
+            const pdfBtn = document.getElementById('reader-pdf-btn');
+            pdfBtn.href = url; pdfBtn.classList.remove('hidden'); pdfBtn.classList.add('flex');
+
+            const iframe = document.getElementById('pdf-viewer-iframe');
+            iframe.src = getEmbeddablePdfUrl(url);
+            iframe.classList.remove('hidden');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('reader-container').classList.remove('scale-95'); }, 10);
+        }
+
+        window.openReaderById = function(id, isBengali) {
+            const item = allData.find(d => d.id === id);
+            if(item) {
+                history.pushState({ tab: currentTab, sub: currentSub, readerOpen: true, item: item }, "", "");
+                openReaderUI(item, isBengali);
+            }
+        };
+
+        window.openReaderUI = function(item, isBengali) {
+            const modal = document.getElementById('reader-modal');
+            document.getElementById('reader-title').innerText = item.title;
+            const contentEl = document.getElementById('reader-content');
+            
+            document.getElementById('pdf-viewer-iframe').classList.add('hidden');
+            document.getElementById('pdf-viewer-iframe').src = '';
+            document.getElementById('text-reader-container').classList.remove('hidden');
+            document.getElementById('zoom-controls').classList.remove('hidden');
+            document.getElementById('reader-pdf-btn').classList.add('hidden');
+
+            if(isBengali) { document.getElementById('reader-title').classList.add('bengali-text'); contentEl.classList.add('bengali-text'); } 
+            else { document.getElementById('reader-title').classList.remove('bengali-text'); contentEl.classList.remove('bengali-text'); }
+            
+            contentEl.innerHTML = item.content ? item.content.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('') : '<p class="text-center opacity-50 mt-10">কোনো টেক্সট নেই!</p>';
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('reader-container').classList.remove('scale-95'); }, 10);
+        };
+
+        window.hideReaderModal = function() {
+            const modal = document.getElementById('reader-modal');
+            const container = document.getElementById('reader-container');
+            modal.classList.add('opacity-0');
+            container.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('pdf-viewer-iframe').src = ''; 
+            }, 300);
+        };
+
+        init();
+    </script>
+</body>
+</html>

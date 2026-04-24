@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive Manager | Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; }
+        .glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="max-w-2xl w-full glass p-8 rounded-[2.5rem] shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-black text-amber-500 uppercase tracking-tighter italic">Archive Manager</h1>
+            <p class="text-slate-400 text-sm mt-2">Upload previous questions to the cloud archive.</p>
+        </div>
+
+        <form id="archive-form" class="space-y-5">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1">Exam Title</label>
+                <input type="text" id="arc-title" required placeholder="Example: BWDB MCQ Exam 2025"
+                    class="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-amber-500 transition-all font-bold">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1">Subtitle / Description</label>
+                <input type="text" id="arc-subtitle" required placeholder="Example: Solution for Electrical Engineering"
+                    class="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-amber-500 transition-all font-bold">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1">Questions Data (questions.txt format)</label>
+                <textarea id="arc-data" required rows="6" placeholder="Question|Opt1|Opt2|Opt3|Opt4|CorrectIndex"
+                    class="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-amber-500 transition-all font-mono text-xs"></textarea>
+                <p class="text-[10px] text-slate-500 mt-2 italic px-2">Format: Question|A|B|C|D|0 (0=prothom option sothik)</p>
+            </div>
+
+            <button type="submit" id="save-btn"
+                class="w-full bg-amber-600 hover:bg-amber-500 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg shadow-amber-600/20">
+                <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save to Archive
+            </button>
+        </form>
+
+        <div class="mt-8 text-center">
+            <a href="exam.html" class="text-slate-500 hover:text-white text-xs font-bold underline transition-colors">Back to Exam Page</a>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 bg-emerald-600 text-white rounded-full font-bold shadow-2xl animate-bounce">
+        Data successfully archived! ✓
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // 🔥 Firebase Config (Aapnar ashol details)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53",
+            storageBucket: "mywebtools-f8d53.firebasestorage.app",
+            messagingSenderId: "979594414301",
+            appId: "1:979594414301:web:7048c995e56e331a85f334"
+        };
+
+        const appId = "rasel-mia-universal-sync";
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const archiveForm = document.getElementById('archive-form');
+        const toast = document.getElementById('toast');
+
+        // Form Submit Logic
+        archiveForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const saveBtn = document.getElementById('save-btn');
+            
+            // Disable button
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Saving...';
+
+            try {
+                // Ensure auth
+                await signInAnonymously(auth);
+
+                const title = document.getElementById('arc-title').value.trim();
+                const subtitle = document.getElementById('arc-subtitle').value.trim();
+                const questionsRaw = document.getElementById('arc-data').value.trim();
+
+                const archiveRef = collection(db, 'artifacts', appId, 'public', 'data', 'exam_archives');
+                
+                await addDoc(archiveRef, {
+                    title: title,
+                    subtitle: subtitle,
+                    questions: questionsRaw,
+                    timestamp: Date.now().toString()
+                });
+
+                // Success
+                toast.classList.remove('hidden');
+                archiveForm.reset();
+                setTimeout(() => toast.classList.add('hidden'), 3000);
+
+            } catch (err) {
+                console.error(err);
+                alert("Database Error: " + err.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save to Archive';
+            }
+        };
+    </script>
+</body>
+</html>
