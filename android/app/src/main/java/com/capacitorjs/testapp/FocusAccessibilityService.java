@@ -21,6 +21,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.core.app.NotificationCompat;
+import org.json.JSONArray;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -32,6 +34,7 @@ public class FocusAccessibilityService extends AccessibilityService {
     private boolean isOverlayShowing = false;
     private final Random random = new Random();
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private long serviceStartTime;
 
     // পপআপে দেখানোর জন্য হাদিস ও উক্তি
     private final List<String> quotes = Arrays.asList(
@@ -69,6 +72,17 @@ public class FocusAccessibilityService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+        
+        // অ্যাপ ইউজেস টাইমের জন্য স্টার্ট টাইম সেট
+        SharedPreferences prefs = getSharedPreferences("FocusSettings", Context.MODE_PRIVATE);
+        long savedStartTime = prefs.getLong("serviceStartTime", 0);
+        if (savedStartTime == 0) {
+            serviceStartTime = System.currentTimeMillis();
+            prefs.edit().putLong("serviceStartTime", serviceStartTime).apply();
+        } else {
+            serviceStartTime = savedStartTime;
+        }
+
         setupForegroundService(); // নোটিফিকেশন বার একটিভ রাখার জন্য
 
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
@@ -88,36 +102,62 @@ public class FocusAccessibilityService extends AccessibilityService {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "RasFocus Active Monitoring", NotificationManager.IMPORTANCE_LOW);
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("RasFocus Pro is Monitoring")
-                .setContentText("Your focus journey is active...")
-                .setSmallIcon(android.R.drawable.ic_lock_idle_lock)
-                .setOngoing(true)
-                .build();
-        startForeground(1, notification);
+        
+        // নোটিফিকেশনে রিয়েল-টাইম (প্রতি মিনিটে) সময় আপডেট করার থ্রেড
+        Runnable updateTimeRunnable = new Runnable() {
+            @Override
+            public void run() {
+                long diff = System.currentTimeMillis() - serviceStartTime;
+                long hours = diff / (1000 * 60 * 60);
+                long mins = (diff % (1000 * 60 * 60)) / (1000 * 60);
+                String timeText = hours + "h " + mins + "m";
+
+                Notification notification = new NotificationCompat.Builder(FocusAccessibilityService.this, CHANNEL_ID)
+                        .setContentTitle("RasFocus Pro is Monitoring")
+                        .setContentText("Active Time: " + timeText)
+                        .setSmallIcon(android.R.drawable.ic_lock_idle_lock)
+                        .setOngoing(true)
+                        .build();
+                startForeground(1, notification);
+                
+                handler.postDelayed(this, 60000); // ১ মিনিট পর পর আপডেট
+            }
+        };
+        handler.post(updateTimeRunnable); // প্রথমবার চালু করা
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        // SharedPreferences থেকে index.html এর সুইচগুলোর স্ট্যাটাস চেক করা
+        // SharedPreferences থেকে index.html এর সুইচ এবং কাস্টম কিওয়ার্ড চেক করা
         SharedPreferences prefs = getSharedPreferences("FocusSettings", Context.MODE_PRIVATE);
         boolean isKeywordBlocked = prefs.getBoolean("blockKeywords", false);
         boolean isAdultBlocked = prefs.getBoolean("adultContent", false);
         boolean isShortsReelsBlocked = prefs.getBoolean("blockReelsShorts", false);
 
-        // যদি কোনো সুইচই অন না থাকে, তবে সার্ভিস কাজ করবে না
+        // HTML থেকে পাওয়া কাস্টম কিওয়ার্ড লিস্ট বের করা
+        String customKwJson = prefs.getString("customKeywordsList", "[]");
+        List<String> customKeywordsList = new ArrayList<>();
+        try {
+            JSONArray jsonArray = new JSONArray(customKwJson);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                customKeywordsList.add(jsonArray.getString(i).toLowerCase());
+            }
+        } catch (Exception ignored) {}
+
+        // যদি কোনো সুইচই অন না থাকে, তবে সার্ভিস স্ক্যান করবে না
         if (!isKeywordBlocked && !isAdultBlocked && !isShortsReelsBlocked) return;
 
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
         if (rootNode == null) return;
 
-        if (scanAndBlock(rootNode, isKeywordBlocked, isAdultBlocked, isShortsReelsBlocked)) {
+        // নোড স্ক্যান করে ব্লক করার সিদ্ধান্ত নেওয়া
+        if (scanAndBlock(rootNode, isKeywordBlocked, isAdultBlocked, isShortsReelsBlocked, customKeywordsList)) {
             showHadithOverlay();
         }
         rootNode.recycle();
     }
 
-    private boolean scanAndBlock(AccessibilityNodeInfo node, boolean kw, boolean adult, boolean shorts) {
+    private boolean scanAndBlock(AccessibilityNodeInfo node, boolean kw, boolean adult, boolean shorts, List<String> customKwList) {
         if (node == null) return false;
 
         CharSequence text = node.getText();
@@ -128,14 +168,21 @@ public class FocusAccessibilityService extends AccessibilityService {
         String content = (text != null ? text.toString() : "") + " " + (desc != null ? desc.toString() : "");
         content = content.toLowerCase();
 
-        // ১. কিওয়ার্ড এবং অ্যাডাল্ট কন্টেন্ট চেক (সুইচ অন থাকলে)
+        // ১. অ্যাডাল্ট কন্টেন্ট বা ডিফল্ট কিওয়ার্ড চেক
         if (kw || adult) {
             for (String k : badKeywords) {
                 if (content.contains(k)) return true;
             }
         }
 
-        // ২. ইউটিউব শর্টস এবং ফেসবুক রিলস চেক (সুইচ অন থাকলে)
+        // ২. ইউজার ড্যাশবোর্ডে যেসব কাস্টম কিওয়ার্ড দিয়েছে তা চেক (শুধুমাত্র কিওয়ার্ড টগল অন থাকলে)
+        if (kw) {
+            for (String k : customKwList) {
+                if (!k.isEmpty() && content.contains(k)) return true;
+            }
+        }
+
+        // ৩. ইউটিউব শর্টস এবং ফেসবুক রিলস চেক
         if (shorts) {
             if (pkg.equals("com.google.android.youtube")) {
                 if (content.contains("shorts") || (viewId != null && viewId.contains("shorts"))) return true;
@@ -147,7 +194,7 @@ public class FocusAccessibilityService extends AccessibilityService {
 
         // রিকার্সিভলি সব এলিমেন্ট চেক করা
         for (int i = 0; i < node.getChildCount(); i++) {
-            if (scanAndBlock(node.getChild(i), kw, adult, shorts)) return true;
+            if (scanAndBlock(node.getChild(i), kw, adult, shorts, customKwList)) return true;
         }
         return false;
     }
@@ -186,10 +233,10 @@ public class FocusAccessibilityService extends AccessibilityService {
             try {
                 windowManager.addView(overlayView, params);
                 
-                // ১ মিলি-সেকেন্ডের মধ্যে হোম স্ক্রিনে পাঠিয়ে দেওয়া (ফ্লিকারিং বন্ধ করার জন্য)
+                // ১ মিলি-সেকেন্ডের মধ্যে হোম স্ক্রিনে পাঠিয়ে দেওয়া (ফ্লিকারিং বন্ধ করার জন্য)
                 performGlobalAction(GLOBAL_ACTION_HOME); 
                 
-                // ৩ সেকেন্ড পর হাদিসটি মিলিয়ে যাবে
+                // ৩ সেকেন্ড পর হাদিসটি মিলিয়ে যাবে
                 handler.postDelayed(() -> {
                     if (overlayView != null) {
                         windowManager.removeView(overlayView);
