@@ -1,798 +1,487 @@
 
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- 🔥 Google Search & SEO Meta Tags 🔥 -->
-    <title>Online PDF & Image Tools | 300x300 Job Photo & Signature Converter | Rasel Mia</title>
-    <meta name="description" content="Free online web tools suite. Merge, Split, Compress PDF, Convert Photo to PDF. Special tools for BD Job applications: 300x300 Photo and 300x80 Signature converter, QR Generator, and Age Calculator.">
-    <meta name="keywords" content="PDF Merger, Split PDF, Photo to PDF converter, Job Photo Converter 300x300, Signature Converter 300x80, BD Job application tool, Age Calculator, QR Code Generator, PNG to PDF, Rasel Mia Web Tools, Free PDF Editor Bangladesh, rasel pdf merger, rasel pdf converter, rasel job photo resizer, rasel pdf compressor, online PDF tools BD, image to PDF Rasel, resize photo for job application Bangladesh, free PDF tools suite">
-    <meta name="author" content="Rasel Mia">
-    <meta name="robots" content="index, follow">
-
-    <!-- 🔥 Facebook & Social Media (Open Graph) 🔥 -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Web Tools Suite - Professional PDF & Image Converter">
-    <meta property="og:description" content="All essential web tools in one place. Resize photos for jobs, merge PDFs, and calculate age instantly. Fast, secure, and free.">
-    <meta property="og:image" content="developer.jpg">
-   
-   
-   
-    <title>My Local Toolset (Updated)</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Required Libraries -->
-    <!-- PDF Manipulation -->
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <!-- PDF Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- QR Code Generator -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- QR Code Reader -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- PDF to Image Rendering -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <!-- File Saver -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-    <script>
-        // PDF.js Worker Setup
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-    </script>
-
+    <title>RasBook - Advanced Social Media</title>
     <style>
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .tool-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            transition: all 0.3s;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+        /* --- CSS: Ultra Professional Facebook UI --- */
+        :root { 
+            --fb-blue: #1877F2; --bg-gray: #c9ccd1; --card-bg: #ffffff; 
+            --text-main: #050505; --text-muted: #65676B; --border-color: #ced0d4; --hover-bg: #f2f2f2; 
         }
-        .tool-card:hover { 
-            transform: translateY(-4px); 
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-            border-color: #3b82f6; 
+        body.dark-mode {
+            --bg-gray: #18191a; --card-bg: #242526; --text-main: #e4e6eb;
+            --text-muted: #b0b3b8; --border-color: #3e4042; --hover-bg: #3a3b3c;
         }
-        .btn-action {
-            background: #2563eb; color: white; padding: 10px;
-            border-radius: 8px; width: 100%; margin-top: 15px;
-            font-weight: 600; transition: background 0.2s;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-action:hover { background: #1d4ed8; }
-        .icon-box {
-            width: 45px; height: 45px; display: flex;
-            align-items: center; justify-content: center;
-            border-radius: 10px; margin-bottom: 15px; font-size: 22px;
-        }
-        input, textarea, select { width: 100%; border: 1px solid #cbd5e1; padding: 8px; border-radius: 6px; margin-bottom: 5px; }
-        .hidden-canvas { display: none; }
-        #qr-result, #qr-reader-result { margin-top: 10px; display: flex; justify-content: center; flex-direction: column; align-items: center; }
-        .result-box { background: #f1f5f9; padding: 10px; border-radius: 6px; margin-top: 10px; font-weight: bold; text-align: center; font-size: 0.9em; color: #334155; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        body { background-color: var(--bg-gray); display: flex; justify-content: center; transition: background-color 0.3s; }
+        .app-container { width: 100%; max-width: 500px; min-height: 100vh; background-color: var(--bg-gray); position: relative; }
+        
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 2000; pointer-events: none; text-align: center; }
+        .toast.show { opacity: 1; }
+
+        /* Login Screen */
+        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: var(--card-bg); padding: 20px; text-align: center; }
+        .logo-text-login { font-size: 55px; font-weight: bold; margin-bottom: 5px; color: var(--fb-blue); }
+        .input-field { width: 100%; padding: 14px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; background: #f5f6f7; outline: none; margin-bottom: 12px; color: #000; }
+        .btn-primary { width: 100%; padding: 14px; background: var(--fb-blue); color: white; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
+        .forgot-password { color: var(--fb-blue); text-decoration: none; font-size: 15px; margin-bottom: 20px; }
+        .divider { width: 100%; height: 1px; background: var(--border-color); margin: 20px 0; }
+
+        /* App Header */
+        #main-app { display: none; flex-direction: column; padding-top: 105px; }
+        .top-bar { position: fixed; top: 0; width: 100%; max-width: 500px; background: var(--fb-blue); z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; }
+        .header h1 { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+        .header-icons { display: flex; gap: 10px; }
+        .icon-btn { background: rgba(255,255,255,0.2); color: white; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; position: relative;}
+        
+        .nav-tabs { display: flex; justify-content: space-between; background: var(--card-bg); padding: 5px 15px; }
+        .tab { flex: 1; text-align: center; padding: 10px 0; font-size: 22px; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab.active { color: var(--fb-blue); border-bottom: 3px solid var(--fb-blue); }
+
+        /* Modals (Settings, Search, Notifications) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-card { background: var(--card-bg); width: 90%; max-width: 400px; padding: 20px; border-radius: 12px; text-align: center; max-height: 80vh; overflow-y: auto; }
+        .modal-card h2 { margin-bottom: 15px; color: var(--text-main); }
+        .close-modal-btn { background: var(--hover-bg); color: var(--text-main); padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
+        
+        /* Search & Notifications Specific */
+        .search-result-item, .notification-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid var(--border-color); text-align: left; }
+        .search-result-item img, .notification-item img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .notification-text { color: var(--text-main); font-size: 14px; }
+        .notification-time { color: var(--text-muted); font-size: 12px; }
+        .unread-badge { position: absolute; top: 0; right: 0; background: red; width: 10px; height: 10px; border-radius: 50%; display: none; }
+
+        /* Create Post & Profile */
+        .settings-avatar-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid var(--fb-blue); }
+        .create-post { background: var(--card-bg); padding: 12px 15px; margin-bottom: 8px; }
+        .post-input-area { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer; }
+        .post-input { flex: 1; border: none; outline: none; font-size: 16px; padding: 10px 15px; background: var(--hover-bg); color: var(--text-main); border-radius: 20px; }
+        .preview-container { position: relative; margin-top: 15px; display: none; }
+        #preview-media { width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; }
+        .remove-img-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+        .post-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px; }
+        .file-upload { color: #45bd62; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .post-btn { background: var(--fb-blue); color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+        /* Stories Section */
+        .stories { display: flex; gap: 10px; padding: 15px; background: var(--card-bg); margin-bottom: 8px; overflow-x: auto; scrollbar-width: none; }
+        .stories::-webkit-scrollbar { display: none; }
+        .story-card { min-width: 100px; height: 170px; border-radius: 12px; background: var(--hover-bg); position: relative; overflow: hidden; background-size: cover; background-position: center; border: 1px solid var(--border-color); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .story-avatar { position: absolute; top: 10px; left: 10px; width: 35px; height: 35px; border-radius: 50%; border: 3px solid var(--fb-blue); z-index: 2; object-fit: cover; }
+        .story-name { position: absolute; bottom: 10px; left: 10px; color: white; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); z-index: 2; }
+        .story-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6)); }
+
+        /* News Feed & Post Card */
+        .feed { display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px; }
+        .post-card { background: var(--card-bg); }
+        .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; position: relative; }
+        .author-info { flex: 1; }
+        .post-author { font-weight: bold; font-size: 15px; color: var(--text-main); }
+        .post-time { font-size: 13px; color: var(--text-muted); }
+        
+        .more-options { position: relative; }
+        .more-btn { background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; padding: 5px; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 30px; background: var(--card-bg); box-shadow: 0 2px 10px rgba(0,0,0,0.3); border-radius: 8px; overflow: hidden; z-index: 10; width: 150px; border: 1px solid var(--border-color); }
+        .dropdown-menu.show { display: block; }
+        .menu-action-btn { width: 100%; padding: 12px; text-align: left; background: none; border: none; color: var(--text-main); font-weight: bold; cursor: pointer; font-size: 15px; }
+        .menu-action-btn:hover { background: var(--hover-bg); }
+        
+        .post-text { padding: 0 15px 10px; font-size: 15px; line-height: 1.5; color: var(--text-main); word-wrap: break-word; }
+        .post-media { width: 100%; max-height: 500px; object-fit: cover; display: block; background: #000; }
+        .post-stats { padding: 10px 15px; color: var(--text-muted); font-size: 14px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; }
+        .post-footer { display: flex; justify-content: space-between; padding: 4px 15px; }
+        .action-btn { flex: 1; background: none; border: none; color: var(--text-muted); font-weight: 600; font-size: 14px; padding: 8px 0; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .action-btn.liked { color: var(--fb-blue); }
+
+        /* Comments */
+        .comments-section { display: none; padding: 10px 15px; border-top: 1px solid var(--border-color); background: var(--card-bg); }
+        .comments-section.show { display: block; }
+        .comment-item { display: flex; gap: 8px; margin-bottom: 12px; position: relative; }
+        .comment-bubble { background: var(--hover-bg); padding: 8px 12px; border-radius: 18px; max-width: 85%; }
+        .comment-author { font-weight: bold; font-size: 13px; color: var(--text-main); }
+        .comment-text { font-size: 14px; color: var(--text-main); word-wrap: break-word; }
+        .delete-comment-btn { background: none; border: none; color: #dc3545; font-size: 12px; cursor: pointer; margin-left: 5px; align-self: center; }
+        .add-comment-box { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+        .comment-input { flex: 1; background: var(--hover-bg); color: var(--text-main); border: none; border-radius: 20px; padding: 10px 15px; outline: none; }
+        .send-comment-btn { background: none; border: none; color: var(--fb-blue); font-weight: bold; cursor: pointer; font-size: 20px; padding: 5px; }
     </style>
 </head>
-<body class="p-6 md:p-10">
-    <div class="max-w-6xl mx-auto">
-        <header class="text-center mb-10">
-            <h1 class="text-3xl font-extrabold text-slate-800">My Local Toolset</h1>
-            <p class="text-slate-500 mt-2">Selected Tools • Offline Ready</p>
-        </header>
+<body>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            <!-- 1. Split PDF -->
-            <div class="tool-card border-t-4 border-red-500">
-                <div>
-                    <div class="icon-box bg-red-100 text-red-600">✂️</div>
-                    <h3 class="text-lg font-bold text-slate-800">Split PDF</h3>
-                    <p class="text-slate-500 text-sm mb-3">Extract pages (e.g., 1, 3-5).</p>
-                </div>
-                <div>
-                    <input type="file" id="split-file" accept=".pdf" class="text-sm">
-                    <div class="flex gap-2">
-                        <input type="number" id="split-start" placeholder="Start" min="1" class="w-1/2">
-                        <input type="number" id="split-end" placeholder="End" min="1" class="w-1/2">
-                    </div>
-                    <button onclick="splitPDF()" class="btn-action bg-red-600">Extract Pages</button>
-                </div>
-            </div>
+<div class="app-container">
+    <div id="toast" class="toast"></div>
 
-            <!-- 2. Custom Photo Resizer -->
-            <div class="tool-card border-t-4 border-rose-500">
-                <div>
-                    <div class="icon-box bg-rose-100 text-rose-600">📐</div>
-                    <h3 class="text-lg font-bold text-slate-800">Photo Resizer</h3>
-                    <p class="text-slate-500 text-sm mb-3">Resize by exact pixels.</p>
-                </div>
-                <div>
-                    <input type="file" id="resize-file" accept="image/*" class="text-sm mb-2">
-                    <div class="flex gap-2">
-                        <input type="number" id="resize-w" placeholder="Width" class="w-1/2">
-                        <input type="number" id="resize-h" placeholder="Height" class="w-1/2">
-                    </div>
-                    <button onclick="customResize()" class="btn-action bg-rose-600">Resize Now</button>
-                </div>
-            </div>
-
-            <!-- 3. QR Code Generator -->
-            <div class="tool-card border-t-4 border-yellow-500">
-                <div>
-                    <div class="icon-box bg-yellow-100 text-yellow-600">📱</div>
-                    <h3 class="text-lg font-bold text-slate-800">QR Generator</h3>
-                    <p class="text-slate-500 text-sm mb-3">Create QR from text/link.</p>
-                </div>
-                <div>
-                    <input type="text" id="qr-text" placeholder="Enter Link or Text..." required>
-                    <div id="qr-result"></div>
-                    <button onclick="generateQR()" class="btn-action bg-yellow-600">Generate QR</button>
-                </div>
-            </div>
-
-            <!-- 4. QR Code Reader (NEW) -->
-            <div class="tool-card border-t-4 border-yellow-600">
-                <div>
-                    <div class="icon-box bg-yellow-100 text-yellow-700">📷</div>
-                    <h3 class="text-lg font-bold text-slate-800">QR Reader</h3>
-                    <p class="text-slate-500 text-sm mb-3">Read QR from Image.</p>
-                </div>
-                <div>
-                    <input type="file" id="qr-input-file" accept="image/*" class="text-sm">
-                    <div id="qr-reader-result" class="text-xs break-all"></div>
-                    <button onclick="readQRCode()" class="btn-action bg-yellow-700">Scan Image</button>
-                </div>
-            </div>
-
-           <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced PDF Merger</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- PDF-Lib import kora holo PDF merge korar ashol kajer jonno -->
-    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-    <style>
-        .drag-over {
-            border: 2px dashed #4b5563; /* tailwind gray-600 */
-            background-color: #f3f4f6; /* tailwind gray-100 */
-            opacity: 0.7;
-        }
-    </style>
-</head>
-<body class="bg-slate-100 p-10 flex justify-center">
-
-    <!-- 7. Advanced PDF Merger Tool Card -->
-    <div class="tool-card bg-white p-6 rounded-xl shadow-lg border-t-4 border-gray-600 w-full max-w-md">
-        <div class="mb-4 flex items-center gap-3">
-            <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 text-2xl shadow-inner">
-                <i class="fa-solid fa-file-pdf"></i>
-            </div>
-            <div>
-                <h3 class="text-xl font-bold text-slate-800">Advanced PDF Merger</h3>
-                <p class="text-slate-500 text-sm">Combine & reorder multiple PDFs.</p>
-            </div>
-        </div>
-
-        <div>
-            <!-- Custom File Input Button -->
-            <input type="file" id="merge-files" multiple accept=".pdf" class="hidden" onchange="handlePDFSelection(event)">
-            <label for="merge-files" class="w-full cursor-pointer flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl text-sm mb-4 transition-all border border-gray-300 border-dashed">
-                <i class="fa-solid fa-plus-circle text-gray-500"></i> Select PDFs
-            </label>
-
-            <!-- Selected Files List Container -->
-            <ul id="pdf-list" class="mb-4 space-y-2 max-h-60 overflow-y-auto pr-1">
-                <!-- JavaScript theke list generate hobe -->
-            </ul>
-
-            <!-- Action Button -->
-            <button id="merge-btn" onclick="executeMerge()" class="hidden w-full bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
-                <i class="fa-solid fa-layer-group"></i> Merge PDFs Now
-            </button>
-        </div>
+    <div id="login-screen">
+        <div class="logo-text-login"><span style="color:#1877F2">Ras</span><span style="color:#42b72a">Book</span></div>
+        <p style="color: var(--text-main); margin-bottom: 30px;">Connect with friends and the world around you.</p>
+        <input type="email" id="email" class="input-field" placeholder="Email address">
+        <input type="password" id="password" class="input-field" placeholder="Password">
+        <button id="login-btn" class="btn-primary">Log In</button>
+        <a href="#" id="forgot-password" class="forgot-password">Forgotten password?</a>
+        <div class="divider"></div>
+        <button id="register-btn" class="btn-primary" style="background: #42b72a; width: 80%;">Create New Account</button>
     </div>
 
-    <script>
-        // PDF file gulo store korar jonno global array
-        let selectedPDFs = [];
-        let dragStartIndex = -1;
+    <div id="main-app">
+        <div class="top-bar">
+            <div class="header">
+                <h1><span style="color:#fff">Ras</span><span style="color:#42b72a">Book</span></h1>
+                <div class="header-icons">
+                    <button class="icon-btn" id="dark-mode-toggle" title="Toggle Dark Mode">🌙</button>
+                    <button class="icon-btn" id="search-btn" title="Search Users">🔍</button>
+                    <a href="chat_indivisual.html" class="icon-btn" title="Messages">💬</a>
+                </div>
+            </div>
+            <div class="nav-tabs">
+                <span class="tab active" id="tab-home">🏠</span>
+                <span class="tab">📺</span>
+                <span class="tab">🏪</span>
+                <span class="tab" id="tab-notifications" style="position:relative;">🔔<div id="unread-badge" class="unread-badge"></div></span>
+                <span class="tab" id="menu-tab">☰</span>
+            </div>
+        </div>
 
-        // 1. File Select korle Array te push kora
-        function handlePDFSelection(event) {
-            const files = event.target.files;
-            if (files.length > 0) {
-                for (let i = 0; i < files.length; i++) {
-                    selectedPDFs.push(files[i]);
-                }
-                renderPDFList();
-            }
-            // Input clear kore dicchi jate same file abar select kora jay dorkar hole
-            event.target.value = ''; 
+        <div id="profile-settings-modal" class="modal-overlay">
+            <div class="modal-card">
+                <h2>Edit Profile</h2>
+                <img src="" id="settings-avatar-preview" class="settings-avatar-preview">
+                <input type="file" id="settings-avatar-upload" accept="image/*" style="display: none;">
+                <br><label for="settings-avatar-upload" style="color: var(--fb-blue); font-weight: bold; cursor: pointer;">Change Photo</label><br><br>
+                <input type="text" id="settings-name-input" class="input-field" placeholder="Your Display Name">
+                <button id="save-profile-btn" class="btn-primary">Save Changes</button>
+                <button class="close-modal-btn" onclick="document.getElementById('profile-settings-modal').style.display='none'">Cancel</button>
+                <button id="logout-btn" class="close-modal-btn" style="background: #dc3545; color: white;">Logout</button>
+            </div>
+        </div>
+
+        <div id="search-modal" class="modal-overlay">
+            <div class="modal-card">
+                <h2>Search Users</h2>
+                <input type="text" id="search-user-input" class="input-field" placeholder="Type a name...">
+                <div id="search-results-container" style="margin-top: 15px; max-height: 250px; overflow-y:auto;"></div>
+                <button class="close-modal-btn" onclick="document.getElementById('search-modal').style.display='none'">Close</button>
+            </div>
+        </div>
+
+        <div id="notifications-modal" class="modal-overlay">
+            <div class="modal-card">
+                <h2>Notifications</h2>
+                <div id="notifications-container" style="max-height: 350px; overflow-y:auto; margin-bottom: 10px;"></div>
+                <button class="close-modal-btn" onclick="document.getElementById('notifications-modal').style.display='none'">Close</button>
+            </div>
+        </div>
+
+        <div class="stories" id="stories-container">
+            <div class="story-card" id="add-story-btn">
+                <img src="" id="my-story-avatar" class="story-avatar">
+                <div class="story-overlay"></div>
+                <div class="story-name">Create Story</div>
+                <input type="file" id="story-upload" accept="image/*,video/*" style="display: none;">
+                <div id="story-loader" style="display:none; color:#fff; z-index:3; font-size:12px;">Uploading...</div>
+            </div>
+            <div id="dynamic-stories" style="display:contents;"></div>
+        </div>
+
+        <div class="create-post">
+            <div class="post-input-area">
+                <img src="" class="avatar" id="current-user-avatar" title="Click to Edit Profile">
+                <input type="text" id="post-text" class="post-input" placeholder="What's on your mind?">
+            </div>
+            <div class="preview-container" id="preview-container">
+                <button class="remove-img-btn" id="remove-img-btn">✕</button>
+                <img id="preview-media" src="" style="display:none;">
+                <video id="preview-video" class="post-media" controls style="display:none;"></video>
+            </div>
+            <div class="post-actions">
+                <label class="file-upload">📸 <span>Photo/Video</span><input type="file" id="post-image" accept="image/*,video/*" style="display: none;"></label>
+                <button id="submit-post-btn" class="post-btn">Post</button>
+            </div>
+        </div>
+
+        <div class="feed" id="feed-container"></div>
+    </div>
+</div>
+
+<script type="module">
+    // Firebase Setup (Replace with your keys if needed)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, getDoc, setDoc, limit, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDvQjNIgVvKk0qa0WZX25etZH73UmHqtIg", authDomain: "rasbook-5159d.firebaseapp.com",
+      databaseURL: "https://rasbook-5159d-default-rtdb.firebaseio.com", projectId: "rasbook-5159d",
+      storageBucket: "rasbook-5159d.firebasestorage.app", messagingSenderId: "983241676717",
+      appId: "1:983241676717:web:bb35a559bd9935c8517324"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let selectedFile = null, fileType = null, toastTimeout;
+    
+    // UI Utilities
+    const showToast = (msg) => { const t = document.getElementById('toast'); clearTimeout(toastTimeout); t.innerText = msg; t.classList.add('show'); toastTimeout = setTimeout(() => t.classList.remove('show'), 3000); };
+    const getAvatar = (user) => user?.photoURL || `https://ui-avatars.com/api/?name=${user?.displayName || 'User'}&background=1877F2&color=fff`;
+    const getDisplayName = (user) => user?.displayName || user?.email?.split('@')[0] || "User";
+    const timeAgo = (date) => {
+        if (!date) return "Just now";
+        const seconds = Math.floor((new Date() - date.toDate()) / 1000);
+        let i = seconds / 86400; if (i > 1) return Math.floor(i) + "d";
+        i = seconds / 3600; if (i > 1) return Math.floor(i) + "h";
+        i = seconds / 60; if (i > 1) return Math.floor(i) + "m";
+        return "Just now";
+    };
+
+    // Dark Mode
+    const dmToggle = document.getElementById('dark-mode-toggle');
+    if(localStorage.getItem('darkMode') === 'enabled') { document.body.classList.add('dark-mode'); dmToggle.innerText = '☀️'; }
+    dmToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
+        dmToggle.innerText = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    });
+
+    // Save User Data to DB (For Search functionality)
+    const saveUserToDB = async (user) => {
+        await setDoc(doc(db, "users", user.uid), { uid: user.uid, displayName: getDisplayName(user), photoURL: getAvatar(user), email: user.email }, { merge: true });
+    };
+
+    // Auth
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user; saveUserToDB(user); updateGlobalUI();
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            loadPosts(); loadStories(); loadNotifications();
+        } else {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
         }
+    });
 
-        // 2. UI te list generate kora (With Drag & Drop & Action Buttons)
-        function renderPDFList() {
-            const listContainer = document.getElementById('pdf-list');
-            const mergeBtn = document.getElementById('merge-btn');
-            listContainer.innerHTML = '';
+    const updateGlobalUI = () => {
+        const av = getAvatar(currentUser);
+        document.getElementById('current-user-avatar').src = av;
+        document.getElementById('my-story-avatar').src = av;
+        document.getElementById('settings-avatar-preview').src = av;
+        document.getElementById('settings-name-input').value = getDisplayName(currentUser);
+    };
 
-            if (selectedPDFs.length === 0) {
-                mergeBtn.classList.add('hidden');
-                listContainer.innerHTML = '<p class="text-xs text-center text-gray-400 py-4 italic">No files selected yet.</p>';
-                return;
-            }
+    document.getElementById('login-btn').addEventListener('click', async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); } catch(e){ showToast("Login Error!"); }});
+    document.getElementById('register-btn').addEventListener('click', async () => { try { await createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); showToast("Account created!"); } catch(e){ showToast("Error!"); }});
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+    document.getElementById('forgot-password').addEventListener('click', async (e) => { e.preventDefault(); const em = document.getElementById('email').value; if(em){ await sendPasswordResetEmail(auth, em); showToast("Reset email sent!");} else showToast("Enter email first."); });
 
-            // Dui ba tar beshi file thaklei merge button dekhabo
-            if (selectedPDFs.length >= 2) {
-                mergeBtn.classList.remove('hidden');
-            } else {
-                mergeBtn.classList.add('hidden');
-            }
+    // Modals & Profile Settings
+    document.getElementById('current-user-avatar').addEventListener('click', () => document.getElementById('profile-settings-modal').style.display = 'flex');
+    document.getElementById('menu-tab').addEventListener('click', () => document.getElementById('profile-settings-modal').style.display = 'flex');
+    let settingsNewAvatar = null;
+    document.getElementById('settings-avatar-upload').addEventListener('change', (e) => { settingsNewAvatar = e.target.files[0]; if(settingsNewAvatar) document.getElementById('settings-avatar-preview').src = URL.createObjectURL(settingsNewAvatar); });
+    
+    document.getElementById('save-profile-btn').addEventListener('click', async (e) => {
+        const newName = document.getElementById('settings-name-input').value.trim(); e.target.innerText = "Saving...";
+        try {
+            let newPhoto = currentUser.photoURL; if (settingsNewAvatar) newPhoto = await uploadToCloudinary(settingsNewAvatar);
+            await updateProfile(currentUser, { displayName: newName, photoURL: newPhoto });
+            await saveUserToDB(auth.currentUser); updateGlobalUI(); showToast("Updated!"); document.getElementById('profile-settings-modal').style.display = 'none';
+        } catch(err){} e.target.innerText = "Save Changes";
+    });
 
-            selectedPDFs.forEach((file, index) => {
-                const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3 shadow-sm cursor-grab transition-all group';
-                li.draggable = true;
-                
-                // Drag and Drop Events
-                li.ondragstart = (e) => dragStart(e, index);
-                li.ondragover = (e) => dragOver(e);
-                li.ondragleave = (e) => dragLeave(e);
-                li.ondrop = (e) => drop(e, index);
+    const uploadToCloudinary = async (file) => {
+        const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', 'ml_default'); fd.append('cloud_name', 'de2w78yxh');
+        const res = await fetch("https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload", { method: "POST", body: fd });
+        return (await res.json()).secure_url;
+    };
 
-                // File name choto kora
-                let fileName = file.name;
-                if(fileName.length > 25) fileName = fileName.substring(0, 22) + '...';
+    // Search Users System
+    document.getElementById('search-btn').addEventListener('click', () => document.getElementById('search-modal').style.display = 'flex');
+    document.getElementById('search-user-input').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const container = document.getElementById('search-results-container'); container.innerHTML = '';
+        if(term.length < 2) return;
+        
+        // Simulating search by fetching users (In production, use algolia or complex indexing)
+        onSnapshot(collection(db, "users"), (snap) => {
+            container.innerHTML = '';
+            snap.forEach(docSnap => {
+                const u = docSnap.data();
+                if(u.displayName.toLowerCase().includes(term) && u.uid !== currentUser.uid) {
+                    container.innerHTML += `<div class="search-result-item"><img src="${u.photoURL}"><div><strong style="color:var(--text-main)">${u.displayName}</strong></div></div>`;
+                }
+            });
+            if(container.innerHTML === '') container.innerHTML = '<p style="color:var(--text-muted)">No users found.</p>';
+        });
+    });
 
-                li.innerHTML = `
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <i class="fa-solid fa-grip-vertical text-gray-300 group-hover:text-gray-500 cursor-grab"></i>
-                        <span class="text-sm font-semibold text-gray-700 truncate" title="${file.name}">${fileName}</span>
-                    </div>
-                    <div class="flex items-center gap-1 shrink-0">
-                        <button onclick="moveUp(${index})" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed" ${index === 0 ? 'disabled' : ''}>
-                            <i class="fa-solid fa-caret-up"></i>
-                        </button>
-                        <button onclick="moveDown(${index})" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed" ${index === selectedPDFs.length - 1 ? 'disabled' : ''}>
-                            <i class="fa-solid fa-caret-down"></i>
-                        </button>
-                        <button onclick="removeFile(${index})" class="w-7 h-7 rounded bg-red-50 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center transition-colors ml-1">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
+    // Story System (Auto Delete Frontend logic 24h)
+    document.getElementById('add-story-btn').addEventListener('click', () => document.getElementById('story-upload').click());
+    document.getElementById('story-upload').addEventListener('change', async (e) => {
+        const file = e.target.files[0]; if(!file) return;
+        document.getElementById('story-loader').style.display = 'block';
+        try {
+            const url = await uploadToCloudinary(file);
+            await addDoc(collection(db, "stories"), { userId: currentUser.uid, userName: getDisplayName(currentUser), userAvatar: getAvatar(currentUser), mediaUrl: url, createdAt: serverTimestamp() });
+            showToast("Story added!");
+        } catch(err){ showToast("Failed to upload story"); }
+        document.getElementById('story-loader').style.display = 'none'; e.target.value = '';
+    });
+
+    const loadStories = () => {
+        onSnapshot(query(collection(db, "stories"), orderBy("createdAt", "desc")), (snap) => {
+            const container = document.getElementById('dynamic-stories'); container.innerHTML = '';
+            const now = Date.now();
+            snap.forEach(docSnap => {
+                const s = docSnap.data();
+                if(s.createdAt) {
+                    const diffHours = (now - s.createdAt.toMillis()) / (1000 * 60 * 60);
+                    if(diffHours < 24) { // Only show stories less than 24 hours old
+                        container.innerHTML += `
+                            <div class="story-card" style="background-image: url('${s.mediaUrl}');" onclick="window.open('${s.mediaUrl}', '_blank')">
+                                <img src="${s.userAvatar}" class="story-avatar">
+                                <div class="story-overlay"></div>
+                                <div class="story-name">${s.userName}</div>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        });
+    };
+
+    // Notifications System
+    const sendNotification = async (toUserId, type, postId) => {
+        if(toUserId === currentUser.uid) return; // Don't notify oneself
+        await addDoc(collection(db, "notifications"), {
+            toUserId, fromUserName: getDisplayName(currentUser), fromUserAvatar: getAvatar(currentUser),
+            type, postId, createdAt: serverTimestamp(), isRead: false
+        });
+    };
+
+    const loadNotifications = () => {
+        const q = query(collection(db, "notifications"), where("toUserId", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
+        onSnapshot(q, (snap) => {
+            const container = document.getElementById('notifications-container'); container.innerHTML = '';
+            let unread = 0;
+            snap.forEach(docSnap => {
+                const n = docSnap.data(); if(!n.isRead) unread++;
+                const actionTxt = n.type === 'like' ? 'liked your post.' : 'commented on your post.';
+                container.innerHTML += `
+                    <div class="notification-item" style="${n.isRead ? '' : 'background:var(--hover-bg)'}">
+                        <img src="${n.fromUserAvatar}">
+                        <div>
+                            <div class="notification-text"><strong>${n.fromUserName}</strong> ${actionTxt}</div>
+                            <div class="notification-time">${timeAgo(n.createdAt)}</div>
+                        </div>
                     </div>
                 `;
-                listContainer.appendChild(li);
             });
-        }
+            const badge = document.getElementById('unread-badge');
+            if(unread > 0) { badge.style.display = 'block'; badge.innerText = unread; } else { badge.style.display = 'none'; }
+        });
+    };
 
-        // --- Drag and Drop Logic ---
-        function dragStart(e, index) {
-            dragStartIndex = index;
-            e.dataTransfer.effectAllowed = 'move';
-            // Ghost image set kora jete pare, tobe default tai bhalo
-        }
+    document.getElementById('tab-notifications').addEventListener('click', async () => {
+        document.getElementById('notifications-modal').style.display = 'flex';
+        // Mark all as read conceptually (In production, update DB docs to isRead=true)
+        document.getElementById('unread-badge').style.display = 'none';
+    });
 
-        function dragOver(e) {
-            e.preventDefault(); // Drop allow korar jonno
-            e.currentTarget.classList.add('drag-over');
-        }
+    // Create Post Media Setup
+    document.getElementById('post-image').addEventListener('change', (e) => {
+        selectedFile = e.target.files[0]; if(!selectedFile) return;
+        fileType = selectedFile.type.startsWith('video') ? 'video' : 'image';
+        document.getElementById('preview-container').style.display = 'block';
+        document.getElementById('preview-media').style.display = fileType === 'image' ? 'block' : 'none';
+        document.getElementById('preview-video').style.display = fileType === 'video' ? 'block' : 'none';
+        document.getElementById(fileType === 'image' ? 'preview-media' : 'preview-video').src = URL.createObjectURL(selectedFile);
+    });
+    document.getElementById('remove-img-btn').addEventListener('click', () => { selectedFile = null; document.getElementById('preview-container').style.display = 'none'; document.getElementById('post-image').value=''; });
 
-        function dragLeave(e) {
-            e.currentTarget.classList.remove('drag-over');
-        }
+    // Post Submit
+    document.getElementById('submit-post-btn').addEventListener('click', async (e) => {
+        const text = document.getElementById('post-text').value.trim(); if (!text && !selectedFile) return showToast("Post empty!");
+        const btn = e.target; btn.disabled = true; btn.innerText = "Posting...";
+        try {
+            let mediaUrl = null; if (selectedFile) mediaUrl = await uploadToCloudinary(selectedFile);
+            await addDoc(collection(db, "posts"), { userId: currentUser.uid, userName: getDisplayName(currentUser), userAvatar: getAvatar(currentUser), text: text, mediaUrl: mediaUrl, mediaType: fileType, likes: [], comments: [], createdAt: serverTimestamp() });
+            document.getElementById('post-text').value = ''; document.getElementById('remove-img-btn').click(); showToast("Published!");
+        } catch (err) {} finally { btn.disabled = false; btn.innerText = "Post"; }
+    });
 
-        function drop(e, targetIndex) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('drag-over');
-
-            if (dragStartIndex === targetIndex) return;
-
-            // Array theke dragged item ti kete target index e boshan
-            const draggedItem = selectedPDFs.splice(dragStartIndex, 1)[0];
-            selectedPDFs.splice(targetIndex, 0, draggedItem);
-            
-            renderPDFList();
-        }
-
-        // --- Button Controls Logic (Mobile er jonno bhalo) ---
-        window.moveUp = (index) => {
-            if (index === 0) return;
-            const item = selectedPDFs.splice(index, 1)[0];
-            selectedPDFs.splice(index - 1, 0, item);
-            renderPDFList();
-        }
-
-        window.moveDown = (index) => {
-            if (index === selectedPDFs.length - 1) return;
-            const item = selectedPDFs.splice(index, 1)[0];
-            selectedPDFs.splice(index + 1, 0, item);
-            renderPDFList();
-        }
-
-        window.removeFile = (index) => {
-            selectedPDFs.splice(index, 1);
-            renderPDFList();
-        }
-
-        // --- PDF Merging Logic (Using pdf-lib) ---
-        window.executeMerge = async () => {
-            const btn = document.getElementById('merge-btn');
-            
-            if (selectedPDFs.length < 2) {
-                alert("Please select at least 2 PDFs to merge.");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-
-            try {
-                const { PDFDocument } = PDFLib;
-                const mergedPdf = await PDFDocument.create();
-
-                // Sequence onujayi protita PDF theke page niye asha
-                for (let file of selectedPDFs) {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdfDoc = await PDFDocument.load(arrayBuffer);
-                    const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
-                    copiedPages.forEach((page) => mergedPdf.addPage(page));
-                }
-
-                // Notun PDF save kora
-                const mergedPdfFile = await mergedPdf.save();
+    // Feed Rendering (Limited to 20 for performance)
+    const loadPosts = () => {
+        onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(20)), (snap) => {
+            const feed = document.getElementById('feed-container'); feed.innerHTML = ''; 
+            snap.forEach((docSnap) => {
+                const post = docSnap.data(); const postId = docSnap.id;
+                const likes = post.likes || []; const comments = post.comments || []; const isLiked = likes.includes(currentUser.uid);
                 
-                // Download trigger kora
-                const blob = new Blob([mergedPdfFile], { type: 'application/pdf' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'Merged_Document_RaselTools.pdf';
-                link.click();
-                
-                // Reset korchi na jate user chaile abar sequence change kore download korte pare
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Merged Successfully!';
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-layer-group"></i> Merge PDFs Now';
-                }, 2000);
+                let commentsHtml = '';
+                comments.forEach(c => {
+                    const canDel = c.userId === currentUser.uid || post.userId === currentUser.uid;
+                    commentsHtml += `<div class="comment-item"><img src="${c.userAvatar}" class="avatar" style="width:30px;height:30px;"><div class="comment-bubble"><div class="comment-author">${c.userName}</div><div class="comment-text">${c.text}</div></div>${canDel ? `<button class="delete-comment-btn" data-id="${c.commentId}">✕</button>` : ''}</div>`;
+                });
 
-            } catch (error) {
-                console.error("Merging error:", error);
-                alert("Error merging PDFs. Ensure they are valid PDF files without passwords.");
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-layer-group"></i> Merge PDFs Now';
-            }
-        };
-    </script>
+                let mediaHtml = '';
+                if (post.mediaUrl) { mediaHtml = post.mediaType === 'video' ? `<video src="${post.mediaUrl}" class="post-media" controls preload="metadata"></video>` : `<img src="${post.mediaUrl}" class="post-media">`; }
+
+                const menuHtml = post.userId === currentUser.uid ? `<div class="more-options"><button class="more-btn">•••</button><div class="dropdown-menu"><button class="menu-action-btn edit-btn">✏️ Edit</button><button class="menu-action-btn delete-btn" style="color:red">🗑️ Delete</button></div></div>` : '';
+
+                const postEl = document.createElement('div'); postEl.className = 'post-card'; postEl.dataset.id = postId; postEl.dataset.owner = post.userId;
+                postEl.innerHTML = `
+                    <div class="post-header"><img src="${post.userAvatar}" class="avatar"><div class="author-info"><div class="post-author">${post.userName}</div><div class="post-time">${timeAgo(post.createdAt)} • 🌎</div></div>${menuHtml}</div>
+                    ${post.text ? `<div class="post-text">${post.text}</div>` : ''} ${mediaHtml}
+                    <div class="post-stats"><span>👍 ${likes.length || ''} </span><span>${comments.length} Comments</span></div>
+                    <div class="post-footer">
+                        <button class="action-btn like-btn ${isLiked ? 'liked' : ''}">${isLiked ? '👍 Liked' : '👍 Like'}</button>
+                        <button class="action-btn comment-btn">💬 Comment</button>
+                    </div>
+                    <div class="comments-section"><div class="comments-list">${commentsHtml}</div><div class="add-comment-box"><img src="${getAvatar(currentUser)}" class="avatar" style="width:32px;height:32px;"><input type="text" class="comment-input" placeholder="Write a comment..."><button class="send-comment-btn">➤</button></div></div>
+                `;
+                feed.appendChild(postEl);
+            });
+        });
+    };
+
+    // Interactions
+    document.addEventListener('click', async (e) => {
+        const target = e.target; const postCard = target.closest('.post-card');
+        if (!target.classList.contains('more-btn')) document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        if (!postCard) return;
+        const postId = postCard.dataset.id; const postOwnerId = postCard.dataset.owner; const postRef = doc(db, "posts", postId);
+
+        if (target.classList.contains('more-btn')) postCard.querySelector('.dropdown-menu').classList.toggle('show');
+        if (target.classList.contains('delete-btn') && confirm("Delete?")) await deleteDoc(postRef);
+        if (target.classList.contains('edit-btn')) {
+            const txt = postCard.querySelector('.post-text')?.innerText || ''; const newTxt = prompt("Edit:", txt);
+            if (newTxt && newTxt !== txt) await updateDoc(postRef, { text: newTxt });
+        }
+        if (target.closest('.like-btn')) {
+            const btn = target.closest('.like-btn');
+            if (btn.classList.contains('liked')) { await updateDoc(postRef, { likes: arrayRemove(currentUser.uid) }); } 
+            else { await updateDoc(postRef, { likes: arrayUnion(currentUser.uid) }); sendNotification(postOwnerId, 'like', postId); }
+        }
+        if (target.closest('.comment-btn')) { const sec = postCard.querySelector('.comments-section'); sec.classList.toggle('show'); if(sec.classList.contains('show')) postCard.querySelector('.comment-input').focus(); }
+        if (target.classList.contains('send-comment-btn')) {
+            const input = postCard.querySelector('.comment-input'); const txt = input.value.trim(); if (!txt) return;
+            const cId = Date.now().toString();
+            await updateDoc(postRef, { comments: arrayUnion({ commentId: cId, userId: currentUser.uid, userName: getDisplayName(currentUser), userAvatar: getAvatar(currentUser), text: txt, timestamp: new Date().toISOString() }) });
+            input.value = ''; sendNotification(postOwnerId, 'comment', postId);
+        }
+        if (target.classList.contains('delete-comment-btn') && confirm("Delete comment?")) {
+            const cId = target.getAttribute('data-id'); const snap = await getDoc(postRef);
+            if(snap.exists()) await updateDoc(postRef, { comments: snap.data().comments.filter(c => c.commentId !== cId) });
+        }
+    });
+</script>
 </body>
-</html>
-
-            <!-- 6. Photo to High Quality PDF -->
-            <div class="tool-card border-t-4 border-green-500">
-                <div>
-                    <div class="icon-box bg-green-100 text-green-600">📄</div>
-                    <h3 class="text-lg font-bold text-slate-800">Photo to PDF</h3>
-                    <p class="text-slate-500 text-sm mb-3">Images to single HQ PDF.</p>
-                </div>
-                <div>
-                    <input type="file" id="img-to-pdf-files" multiple accept="image/*" class="text-sm">
-                    <button onclick="imagesToPDF()" class="btn-action bg-green-600">Create PDF</button>
-                </div>
-            </div>
-
-            <!-- 8. Job Photo Converter -->
-            <div class="tool-card border-t-4 border-blue-500">
-                <div>
-                    <div class="icon-box bg-blue-100 text-blue-600">👤</div>
-                    <h3 class="text-lg font-bold text-slate-800">Job Photo</h3>
-                    <p class="text-slate-500 text-sm mb-3">300x300 px | JPG.</p>
-                </div>
-                <div>
-                    <input type="file" id="job-photo-file" accept="image/*" class="text-sm">
-                    <button onclick="processImage(300, 300, 'job-photo.jpg', 'job-photo-file')" class="btn-action bg-blue-600">Convert Photo</button>
-                </div>
-            </div>
-
-            <!-- 9. Signature Converter -->
-            <div class="tool-card border-t-4 border-indigo-500">
-                <div>
-                    <div class="icon-box bg-indigo-100 text-indigo-600">✍️</div>
-                    <h3 class="text-lg font-bold text-slate-800">Signature</h3>
-                    <p class="text-slate-500 text-sm mb-3">300x80 px | JPG.</p>
-                </div>
-                <div>
-                    <input type="file" id="sign-photo-file" accept="image/*" class="text-sm">
-                    <button onclick="processImage(300, 80, 'signature.jpg', 'sign-photo-file')" class="btn-action bg-indigo-600">Convert Sign</button>
-                </div>
-            </div>
-
-            <!-- 10. Compress PDF -->
-            <div class="tool-card border-t-4 border-orange-500">
-                <div>
-                    <div class="icon-box bg-orange-100 text-orange-600">🗜️</div>
-                    <h3 class="text-lg font-bold text-slate-800">Compress PDF</h3>
-                    <p class="text-slate-500 text-sm mb-3">Optimize PDF structure.</p>
-                </div>
-                <div>
-                    <input type="file" id="compress-file" accept=".pdf" class="text-sm">
-                    <button onclick="compressPDF()" class="btn-action bg-orange-600">Compress & Save</button>
-                </div>
-            </div>
-
-            <!-- 11. Age Calculator -->
-            <div class="tool-card border-t-4 border-lime-500">
-                <div>
-                    <div class="icon-box bg-lime-100 text-lime-700">📅</div>
-                    <h3 class="text-lg font-bold text-slate-800">Age Calculator</h3>
-                    <p class="text-slate-500 text-sm mb-3">Calculate exact age.</p>
-                </div>
-                <div>
-                    <label class="text-xs text-slate-500">Date of Birth:</label>
-                    <input type="date" id="age-dob" class="text-sm">
-                    <label class="text-xs text-slate-500">Calculate as of (Optional):</label>
-                    <input type="date" id="age-target" class="text-sm">
-                    <button onclick="calculateAge()" class="btn-action bg-lime-600">Calculate Age</button>
-                    <div id="age-result" class="result-box hidden"></div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Hidden Canvas -->
-    <canvas id="canvas" class="hidden-canvas"></canvas>
-
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        const { PDFDocument, rgb, degrees } = PDFLib;
-
-        // --- Helper: Read File as ArrayBuffer ---
-        const readFileAsync = (file) => {
-            return new Promise((resolve, reject) => {
-                let reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsArrayBuffer(file);
-            });
-        };
-
-        // --- Helper: Read Image as DataURL ---
-        const readImageAsync = (file) => {
-            return new Promise((resolve, reject) => {
-                let reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        };
-
-        // 1. SPLIT PDF
-        async function splitPDF() {
-            const fileInput = document.getElementById('split-file');
-            const startPage = parseInt(document.getElementById('split-start').value);
-            const endPage = parseInt(document.getElementById('split-end').value);
-
-            if (!fileInput.files[0] || !startPage || !endPage) return alert("Please select file and page range");
-
-            const pdfBytes = await readFileAsync(fileInput.files[0]);
-            const pdfDoc = await PDFDocument.load(pdfBytes);
-            const newPdf = await PDFDocument.create();
-
-            const totalPages = pdfDoc.getPageCount();
-            if(startPage < 1 || endPage > totalPages || startPage > endPage) return alert("Invalid page range");
-
-            const range = [];
-            for (let i = startPage - 1; i < endPage; i++) range.push(i);
-
-            const copiedPages = await newPdf.copyPages(pdfDoc, range);
-            copiedPages.forEach((page) => newPdf.addPage(page));
-
-            const pdfData = await newPdf.save();
-            const blob = new Blob([pdfData], { type: 'application/pdf' });
-            saveAs(blob, `split_pages_${startPage}-${endPage}.pdf`);
-        }
-
-        // 2. CUSTOM RESIZER
-        function customResize() {
-            const fileInput = document.getElementById('resize-file');
-            const w = parseInt(document.getElementById('resize-w').value);
-            const h = parseInt(document.getElementById('resize-h').value);
-
-            if(!fileInput.files[0] || !w || !h) return alert("Select file and enter dimensions.");
-
-            processImage(w, h, `resized_${w}x${h}.jpg`, 'resize-file');
-        }
-
-        // 3. QR GENERATOR
-        function generateQR() {
-            const text = document.getElementById('qr-text').value;
-            const container = document.getElementById('qr-result');
-            container.innerHTML = "";
-            
-            if(!text) return alert("Enter text");
-
-            new QRCode(container, {
-                text: text,
-                width: 128,
-                height: 128
-            });
-
-            setTimeout(() => {
-                const img = container.querySelector('img');
-                if(img) {
-                    const link = document.createElement('a');
-                    link.href = img.src;
-                    link.download = 'qrcode.png';
-                    link.innerText = "Download QR";
-                    link.className = "text-blue-600 underline text-sm block mt-2";
-                    container.appendChild(link);
-                }
-            }, 500);
-        }
-
-        // 4. QR READER (NEW)
-        function readQRCode() {
-            const fileInput = document.getElementById('qr-input-file');
-            const resultBox = document.getElementById('qr-reader-result');
-
-            if (!fileInput.files[0]) return alert("Select an image with QR code");
-
-            const html5QrCode = new Html5Qrcode("qr-reader-dummy-id"); // Instance ID not really needed for file scan
-            
-            html5QrCode.scanFile(fileInput.files[0], true)
-            .then(decodedText => {
-                resultBox.innerHTML = `<div class="bg-green-100 text-green-700 p-2 rounded mt-2"><strong>Result:</strong><br>${decodedText}</div>`;
-                // Add copy button
-                const copyBtn = document.createElement('button');
-                copyBtn.innerText = "Copy Text";
-                copyBtn.className = "text-xs mt-1 text-blue-600 underline";
-                copyBtn.onclick = () => {
-                     navigator.clipboard.writeText(decodedText);
-                     alert("Copied!");
-                };
-                resultBox.appendChild(copyBtn);
-            })
-            .catch(err => {
-                resultBox.innerHTML = `<div class="text-red-500 mt-2">Error: Could not read QR code. Ensure image is clear.</div>`;
-                console.error(err);
-            });
-        }
-
-        // 5. PDF TO HIGH QUALITY PNG (NEW)
-        async function convertPdfToPng() {
-            const fileInput = document.getElementById('pdf-to-img-file');
-            let pageNum = parseInt(document.getElementById('pdf-page-num').value) || 1;
-
-            if (!fileInput.files[0]) return alert("Select a PDF file");
-
-            const file = fileInput.files[0];
-            const fileReader = new FileReader();
-
-            fileReader.onload = async function() {
-                const typedarray = new Uint8Array(this.result);
-
-                try {
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    
-                    if (pageNum > pdf.numPages) {
-                        alert(`Error: PDF only has ${pdf.numPages} pages.`);
-                        return;
-                    }
-
-                    const page = await pdf.getPage(pageNum);
-                    const viewport = page.getViewport({ scale: 2.0 }); // Scale 2.0 for High Quality
-
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    const renderContext = {
-                        canvasContext: context,
-                        viewport: viewport
-                    };
-
-                    await page.render(renderContext).promise;
-
-                    canvas.toBlob(function(blob) {
-                        saveAs(blob, `page_${pageNum}.png`);
-                    }, 'image/png');
-
-                } catch (error) {
-                    console.error(error);
-                    alert("Error processing PDF. See console.");
-                }
-            };
-            fileReader.readAsArrayBuffer(file);
-        }
-
-        // 6. PHOTO TO PDF
-        async function imagesToPDF() {
-            const fileInput = document.getElementById('img-to-pdf-files');
-            if (fileInput.files.length === 0) return alert("Select images");
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            for (let i = 0; i < fileInput.files.length; i++) {
-                const dataUrl = await readImageAsync(fileInput.files[i]);
-                const imgProps = doc.getImageProperties(dataUrl);
-                const pdfWidth = doc.internal.pageSize.getWidth();
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-                if (i > 0) doc.addPage();
-                doc.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-            }
-
-            doc.save("images_combined.pdf");
-        }
-
-        // 7. PDF MERGER
-        async function mergePDFs() {
-            const fileInput = document.getElementById('merge-files');
-            if (fileInput.files.length < 2) return alert("Select at least 2 PDFs");
-
-            const mergedPdf = await PDFDocument.create();
-
-            for (let file of fileInput.files) {
-                const bytes = await readFileAsync(file);
-                const pdf = await PDFDocument.load(bytes);
-                const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-                copiedPages.forEach((page) => mergedPdf.addPage(page));
-            }
-
-            const pdfData = await mergedPdf.save();
-            const blob = new Blob([pdfData], { type: 'application/pdf' });
-            saveAs(blob, 'merged_files.pdf');
-        }
-
-        // 8 & 9. IMAGE PROCESSOR (Job Photo & Signature & Resizer)
-        function processImage(targetW, targetH, filename, elementId) {
-            const fileInput = document.getElementById(elementId);
-            
-            if (!fileInput.files[0]) return alert("Select an image");
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.getElementById('canvas');
-                    canvas.width = targetW;
-                    canvas.height = targetH;
-                    const ctx = canvas.getContext('2d');
-                    
-                    ctx.fillStyle = "#FFFFFF";
-                    ctx.fillRect(0,0, targetW, targetH);
-                    
-                    ctx.drawImage(img, 0, 0, targetW, targetH);
-                    
-                    canvas.toBlob(function(blob) {
-                        saveAs(blob, filename);
-                    }, 'image/jpeg', 0.9); // 0.9 = 90% Quality
-                }
-                img.src = event.target.result;
-            }
-            reader.readAsDataURL(fileInput.files[0]);
-        }
-
-        // 10. COMPRESS PDF
-        async function compressPDF() {
-            const fileInput = document.getElementById('compress-file');
-            if (!fileInput.files[0]) return alert("Please select a PDF");
-
-            const pdfBytes = await readFileAsync(fileInput.files[0]);
-            const pdfDoc = await PDFDocument.load(pdfBytes);
-            // pdf-lib compression is limited, basically removes object streams
-            const pdfData = await pdfDoc.save({ useObjectStreams: false }); 
-            const blob = new Blob([pdfData], { type: 'application/pdf' });
-            saveAs(blob, 'compressed_doc.pdf');
-        }
-
-        // 11. AGE CALCULATOR
-        function calculateAge() {
-            const dobInput = document.getElementById('age-dob').value;
-            const targetInput = document.getElementById('age-target').value || new Date().toISOString().split('T')[0];
-            
-            if(!dobInput) return alert("Please select Date of Birth");
-
-            const dob = new Date(dobInput);
-            const target = new Date(targetInput);
-            
-            let years = target.getFullYear() - dob.getFullYear();
-            let months = target.getMonth() - dob.getMonth();
-            let days = target.getDate() - dob.getDate();
-
-            if (days < 0) {
-                months--;
-                const prevMonth = new Date(target.getFullYear(), target.getMonth(), 0);
-                days += prevMonth.getDate();
-            }
-            if (months < 0) {
-                years--;
-                months += 12;
-            }
-
-            const resultBox = document.getElementById('age-result');
-            resultBox.innerText = `${years} Years, ${months} Months, ${days} Days`;
-            resultBox.classList.remove('hidden');
-        }
-
-        // Dummy element for Html5Qrcode to attach to (required even for file scan)
-        const dummyDiv = document.createElement('div');
-        dummyDiv.id = "qr-reader-dummy-id";
-        dummyDiv.style.display = "none";
-        document.body.appendChild(dummyDiv);
-
-    </script>
-    <script type="module" src="tracker.js"></script>
-    <style>
-    .scrollable-home-btn {
-        position: absolute; /* Etai main jinish, fixed hobe na, page-er sathe scroll hobe */
-        top: 15px;
-        right: 15px;
-        background-color: #008CBA;
-        color: white;
-        padding: 6px 12px; /* Button choto korar jonno */
-        border-radius: 20px;
-        text-decoration: none;
-        font-family: Arial, sans-serif;
-        font-size: 13px; /* Font choto korar jonno */
-        font-weight: bold;
-        z-index: 1000;
-        box-shadow: 0px 3px 8px rgba(0,0,0,0.2);
-        transition: background-color 0.3s ease;
-    }
-
-    .scrollable-home-btn:hover {
-        background-color: #005f7a;
-    }
-</style>
-
-<a href="index.html" class="scrollable-home-btn">
-    🏠 Home
-</a>
-</body>
-    <!-- 💬 Universal Comment Section HTML -->
-    <div class="max-w-4xl mx-auto px-4 py-10 w-full relative z-10">
-        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-slate-100">
-            
-            <h2 class="text-2xl font-black mb-6 text-slate-800 flex items-center gap-3">
-                <i class="fa-regular fa-comments text-pink-500"></i>
-                Apnar Motamot
-            </h2>
-            
-            <!-- Comment Input Form -->
-            <div class="mb-8 flex flex-col gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <input type="text" id="comment-name" placeholder="Apnar Nam (Optional)" class="p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all w-full md:w-1/3 text-slate-700 font-medium text-sm">
-                
-                <div class="flex flex-col md:flex-row gap-3">
-                    <textarea id="comment-text" rows="2" placeholder="Ekhane apnar motamot ba proshno likhun..." class="p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all flex-grow text-slate-700 text-sm resize-none"></textarea>
-                    
-                    <button id="submit-comment" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-pink-500/30 active:scale-95 whitespace-nowrap flex items-center justify-center gap-2">
-                        <i class="fa-regular fa-paper-plane"></i> Pathan
-                    </button>
-                </div>
-            </div>
-
-            <!-- List of Comments (Dynamic Load) -->
-            <div id="comments-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                <p class="text-slate-400 italic text-sm text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Comments asche...</p>
-            </div>
-            
-        </div>
-    </div>
-
-    <!-- 🔥 Comments Script Import 🔥 -->
-    <script type="module" src="comments.js"></script>
-
-
 </html>
