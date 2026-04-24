@@ -1,27 +1,46 @@
-name: CI
+name: Build Android APK
 
 on:
   push:
     branches:
-      - '**'
-  pull_request_target:
-    branches:
-      - '**'
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
-    name: Build and Test
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+
     steps:
-      - uses: actions/setup-node@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - uses: actions/checkout@v4
-      - name: Restore Dependency Cache
-        uses: actions/cache@v4
+          node-version: '20'
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.OS }}-dependency-cache-${{ hashFiles('**/package.json') }}
-      - run: npm install
-      - run: npm run build
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Sync Capacitor
+        run: |
+          # public ফোল্ডারের ফাইলগুলো android প্রজেক্টে কপি করবে
+          npx cap sync android
+
+      - name: Build Debug APK
+        working-directory: ./android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-app-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
