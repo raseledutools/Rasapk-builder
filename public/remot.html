@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RasFocus Pro - Admin Console</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #0b57d0;
+            --primary-soft: #e8f0fe;
+            --surface: #ffffff;
+            --surface-2: #f7f9fc;
+            --bg: #eef2f7;
+            --text: #122033;
+            --muted: #617086;
+            --border: #dde5ef;
+            --success: #13a56b;
+            --success-soft: #ddf7ec;
+            --danger: #dc3c3c;
+            --danger-soft: #ffe5e5;
+            --warning: #f5a623;
+            --warning-soft: #fff1d8;
+            --trial: #7c5cff;
+            --trial-soft: #ece8ff;
+            --shadow: 0 10px 30px rgba(18, 32, 51, 0.08);
+            --radius: 18px;
+            --sidebar-width: 380px;
+            --header-height: 76px;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+        
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        
+        button, input, textarea, select { font-family: inherit; }
+        
+        .app-shell {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .topbar {
+            height: var(--header-height);
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #0b57d0, #1a73e8);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            box-shadow: 0 6px 20px rgba(11, 87, 208, 0.22);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .brand-block {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+        
+        .brand-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.18);
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        
+        .brand-text h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+        
+        .brand-text p {
+            margin: 3px 0 0;
+            font-size: 12px;
+            color: rgba(255,255,255,0.82);
+        }
+        
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        
+        .admin-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .primary-btn, .secondary-btn, .ghost-btn, .danger-btn, .success-btn {
+            border: 0;
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .primary-btn { background: #fff; color: var(--primary); }
+        .secondary-btn { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+        .ghost-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+        .danger-btn { background: var(--danger); color: #fff; }
+        .success-btn { background: var(--success); color: #fff; }
+        
+        .primary-btn:hover, .secondary-btn:hover, .ghost-btn:hover, .danger-btn:hover, .success-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .workspace {
+            display: flex;
+            min-height: 0;
+            flex: 1;
+            padding: 18px;
+            gap: 18px;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: 320px;
+            max-width: 420px;
+            background: var(--surface);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        
+        .sidebar-head {
+            padding: 18px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, #ffffff, #fbfcfe);
+        }
+        
+        .toolbar-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .search-wrap { position: relative; }
+        .search-wrap input {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            border-radius: 14px;
+            padding: 13px 14px 13px 42px;
+            outline: none;
+            font-size: 14px;
+            color: var(--text);
+        }
+        .search-wrap span {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 15px;
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        .mini-stat {
+            padding: 12px;
+            border-radius: 16px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+        }
+        
+        .mini-stat .label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 6px;
+        }
+        
+        .mini-stat .value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        
+        .list-wrap {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            background: #fbfcff;
+        }
+        
+        .list-item {
+            display: grid;
+            grid-template-columns: 52px minmax(0, 1fr) auto;
+            gap: 12px;
+            padding: 14px 18px;
+            border-bottom: 1px solid #eef2f7;
+            cursor: pointer;
+            transition: 0.18s ease;
+            align-items: center;
+        }
+        
+        .list-item:hover { background: #f6f9ff; }
+        .list-item.active {
+            background: #edf4ff;
+            border-left: 4px solid var(--primary);
+            padding-left: 14px;
+        }
+        
+        .avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #dbe8ff, #bfd5ff);
+            color: var(--primary);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .item-main { min-width: 0; }
+        .item-main h3 {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .item-sub, .device-code, .tiny-text {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+        
+        .device-code {
+            display: inline-block;
+            background: #eef3fb;
+            border-radius: 8px;
+            padding: 4px 8px;
+            margin-top: 6px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .status-stack {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+        
+        .status-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 7px 10px;
+            border-radius: 999px;
+        }
+        
+        .status-APPROVED { background: var(--success-soft); color: #0a7b50; }
+        .status-REVOKED { background: var(--danger-soft); color: #b22323; }
+        .status-TRIAL { background: var(--trial-soft); color: #5d43d7; }
+        .status-active { background: #e2f8ea; color: #0b8b55; }
+        .status-inactive { background: #edf1f6; color: #68768b; }
+        .status-adminlock { background: #fff2d6; color: #9d6200; }
+        .status-userlock { background: #e8efff; color: #2454d3; }
+        
+        .detail-panel {
+            flex: 1;
+            min-width: 0;
+            background: var(--surface);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+        
+        .detail-header {
+            padding: 22px 24px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            background: linear-gradient(180deg, #ffffff, #fbfdff);
+        }
+        
+        .detail-title {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            min-width: 0;
+        }
+        
+        .detail-title .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
+            font-size: 22px;
+        }
+        
+        .detail-meta h2 {
+            margin: 0;
+            font-size: 22px;
+            line-height: 1.25;
+        }
+        
+        .detail-meta p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        
+        .detail-content {
+            padding: 22px 24px 28px;
+            overflow: auto;
+            background: #fbfcff;
+        }
+        
+        .panel-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+        }
+        
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 5px 16px rgba(18, 32, 51, 0.04);
+        }
+        
+        .span-4 { grid-column: span 4; }
+        .span-5 { grid-column: span 5; }
+        .span-6 { grid-column: span 6; }
+        .span-7 { grid-column: span 7; }
+        .span-8 { grid-column: span 8; }
+        .span-12 { grid-column: span 12; }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .subtle {
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        .kv-list { display: grid; gap: 10px; }
+        .kv-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px dashed #edf1f6;
+        }
+        .kv-row:last-child { border-bottom: 0; padding-bottom: 0; }
+        .kv-row strong { font-size: 13px; }
+        .kv-row span, .kv-row code { color: var(--muted); font-size: 13px; }
+        .kv-row code { background: #f1f5fb; padding: 4px 8px; border-radius: 8px; word-break: break-all; }
+        
+        .tracker-box {
+            background: linear-gradient(180deg, #f7fbff, #eff5ff);
+            border: 1px solid #d7e6ff;
+            border-radius: 18px;
+            padding: 16px;
+            display: grid;
+            gap: 10px;
+        }
+        
+        .tracker-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .pill-green { background: #dff8ea; color: #0a8c57; }
+        .pill-gray { background: #edf1f6; color: #627086; }
+        .pill-yellow { background: var(--warning-soft); color: #b46e00; }
+        .pill-blue { background: #e7efff; color: #2454d3; }
+        
+        .input, .textarea, .select {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+        }
+        
+        .textarea { min-height: 110px; resize: vertical; }
+        .field-group { display: grid; gap: 10px; }
+        .field-label { font-size: 13px; font-weight: 600; color: var(--text); }
+        
+        .inline-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .lock-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .dual-field {
+            display: grid;
+            grid-template-columns: 1fr 180px;
+            gap: 10px;
+        }
+        
+        .chat-stream {
+            min-height: 220px;
+            max-height: 360px;
+            overflow: auto;
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: linear-gradient(180deg, #f9fbff, #f3f7fd);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .bubble {
+            max-width: 85%;
+            padding: 12px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        
+        .bubble.user {
+            align-self: flex-start;
+            background: #ebf1f7;
+            color: var(--text);
+            border-bottom-left-radius: 5px;
+        }
+        
+        .bubble.admin {
+            align-self: flex-end;
+            background: var(--primary);
+            color: #fff;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .chat-compose {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        
+        .broadcast-banner {
+            padding: 14px;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #fffaf0, #fff3da);
+            border: 1px solid #ffe1a3;
+            display: grid;
+            gap: 10px;
+        }
+        
+        .placeholder {
+            height: 100%;
+            display: grid;
+            place-items: center;
+            padding: 30px;
+            text-align: center;
+            color: var(--muted);
+        }
+        
+        .placeholder-inner { max-width: 420px; }
+        .placeholder-emoji { font-size: 56px; margin-bottom: 14px; }
+        
+        .mobile-detail-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 18, 30, 0.55);
+            z-index: 30;
+            display: none;
+            padding: 0;
+        }
+        
+        .mobile-detail-overlay.open { display: block; }
+        
+        .mobile-sheet {
+            position: absolute;
+            inset: 0;
+            background: var(--surface);
+            overflow: auto;
+        }
+        
+        .mobile-sheet .detail-panel {
+            border-radius: 0;
+            min-height: 100%;
+            box-shadow: none;
+        }
+        
+        .mobile-topline {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+        
+        .empty-state {
+            padding: 22px;
+            text-align: center;
+            color: var(--muted);
+        }
+        
+        .lock-health {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        
+        .mini-lock-card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+            background: #fbfdff;
+        }
+        
+        .mini-lock-card .k {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        
+        .mini-lock-card .v {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .spin-clock {
+            display: inline-block;
+            animation: spin 1.4s linear infinite;
+            transform-origin: center;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Toggles CSS */        
+        .toggle-line { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; padding: 8px 0; border-bottom: 1px dashed #edf1f6; cursor: pointer; }        
+        .toggle-switch { position: relative; width: 42px; height: 22px; background: var(--border); border-radius: 22px; transition: 0.3s; }        
+        .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }        
+        input[type="checkbox"]:checked + .toggle-switch { background: var(--primary); }        
+        input[type="checkbox"]:checked + .toggle-switch::after { transform: translateX(20px); }
+
+        @media (max-width: 1200px) {
+            .panel-grid .span-4, .panel-grid .span-5, .panel-grid .span-6, .panel-grid .span-7, .panel-grid .span-8 { grid-column: span 12; }
+        }
+        
+        @media (max-width: 900px) {
+            body { overflow: auto; }
+            .app-shell { height: auto; min-height: 100vh; }
+            .workspace { padding: 12px; }
+            .detail-panel.desktop-detail { display: none; }
+            .sidebar { width: 100%; max-width: none; min-width: 0; border-radius: 20px; }
+            .toolbar-grid { grid-template-columns: 1fr; }
+            .quick-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .mobile-topline { display: flex; }
+            .topbar { height: auto; align-items: flex-start; flex-direction: column; }
+            .topbar-actions { width: 100%; justify-content: space-between; }
+        }
+        
+        @media (max-width: 640px) {
+            .workspace { padding: 10px; }
+            .topbar { padding: 14px; }
+            .brand-text h1 { font-size: 18px; }
+            .topbar-actions { gap: 8px; }
+            .admin-chip { font-size: 12px; }
+            .list-item { grid-template-columns: 48px minmax(0, 1fr); }
+            .status-stack { grid-column: 2; align-items: flex-start; text-align: left; }
+            .detail-header, .detail-content { padding-left: 16px; padding-right: 16px; }
+            .detail-header { flex-direction: column; }
+            .header-actions { width: 100%; justify-content: stretch; }
+            .header-actions button { flex: 1; }
+            .chat-compose, .lock-row, .dual-field { grid-template-columns: 1fr; }
+            .lock-health { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <div class="brand-icon">🛡️</div>
+                <div class="brand-text">
+                    <h1>RasFocus Pro Admin Console</h1>
+                    <p>Live lock monitor • password control • real-time device command panel</p>
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <button class="primary-btn" onclick="openBroadcastComposer()">📢 Broadcast</button>
+                <div class="admin-chip">👤 Admin: Rasel Mia</div>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <aside class="sidebar">
+                <div class="sidebar-head">
+                    <div class="toolbar-grid">
+                        <label class="search-wrap">
+                            <span>🔍</span>
+                            <input type="text" id="searchInput" placeholder="Search name, email, phone, device..." oninput="filterUsers()" />
+                        </label>
+                        <button class="secondary-btn" onclick="refreshSelection()">↻ Refresh</button>
+                    </div>
+                    <div class="quick-stats">
+                        <div class="mini-stat">
+                            <div class="label">Devices</div>
+                            <div class="value" id="statTotal">0</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="label">Approved</div>
+                            <div class="value" id="statApproved">0</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="label">Locked</div>
+                            <div class="value" id="statLocked">0</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="label">Focus ON</div>
+                            <div class="value" id="statActive">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-wrap" id="userList">
+                    <div class="empty-state">Loading live device data from Firebase...</div>
+                </div>
+            </aside>
+
+            <section class="detail-panel desktop-detail" id="desktopDetail">
+                <div class="placeholder">
+                    <div class="placeholder-inner">
+                        <div class="placeholder-emoji">📲</div>
+                        <h2>Select a user/device</h2>
+                        <p>Left side list থেকে যেকোনো device select করলে এখানে live lock state, password, relock, unlock, chat এবং broadcast control দেখা যাবে।</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="mobile-detail-overlay" id="mobileOverlay">
+        <div class="mobile-sheet">
+            <div class="mobile-topline">
+                <strong>Device Control</strong>
+                <button class="ghost-btn" onclick="closeMobileDetail()">✕ Close</button>
+            </div>
+            <section id="mobileDetailMount"></section>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let allUsersData = {};
+        let filteredDeviceIds = [];
+        let selectedDeviceId = null;
+        let lastActivityMap = {}; // Tracks last interaction time for WhatsApp style sorting
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getInitials(name) {
+            const safe = (name || 'User').trim();
+            const parts = safe.split(/\s+/).filter(Boolean).slice(0, 2);
+            return parts.map(p => p[0]?.toUpperCase() || '').join('') || 'U';
+        }
+
+        function getStatusClass(status) {
+            return `status-${status || 'TRIAL'}`;
+        }
+
+        function isAdminCommandLock(req) {
+            return req?.adminCmd === 'START_FOCUS' || req?.adminCmd === 'ACK_START';
+        }
+
+        function isAnyLockActive(req) {
+            if (!req) return false;
+            const active = req.isSelfControlActive === true;
+            const hasPass = !!String(req.livePassword || req.adminPass || '').trim();
+            return active || isAdminCommandLock(req) || hasPass;
+        }
+
+        function getLockSource(req) {
+            if (!req) return 'Not Locked';
+            const adminLocked = isAdminCommandLock(req);
+            const hasLivePass = !!String(req.livePassword || '').trim();
+            const activeType = String(req.activeModeType || '').toLowerCase();
+
+            if (adminLocked) return 'Developer Lock';
+            if (hasLivePass) return 'Friend Lock';
+            if (req.isSelfControlActive === true && (activeType.includes('timer') || activeType.includes('pomodoro'))) {
+                return 'Self Control';
+            }
+            if (req.isSelfControlActive === true) return 'Active Session';
+            return 'Not Locked';
+        }
+
+        function getVisiblePassword(req) {
+            return String(req?.livePassword || req?.adminPass || '').trim();
+        }
+
+        function getLockBadge(req) {
+            const source = getLockSource(req);
+            if (source === 'Developer Lock') return `<span class="status-badge status-adminlock">Developer Lock</span>`;
+            if (source === 'Friend Lock') return `<span class="status-badge status-userlock">Friend Lock</span>`;
+            if (source === 'Self Control' || source === 'Active Session') return `<span class="status-badge status-active">Session Running</span>`;
+            return `<span class="status-badge status-inactive">Unlocked</span>`;
+        }
+
+        function getFilteredUsers() {
+            const q = document.getElementById('searchInput')?.value?.trim().toLowerCase() || '';
+            let ids = Object.keys(allUsersData);
+
+            // SORTING LOGIC: WhatsApp style (Most recent activity at the top)
+            ids.sort((a, b) => {
+                const timeA = lastActivityMap[a] || 0;
+                const timeB = lastActivityMap[b] || 0;
+                return timeB - timeA; // Descending order
+            });
+
+            return ids.filter(id => {
+                const u = allUsersData[id] || {};
+                const blob = [
+                    id,
+                    u.profileName,
+                    u.userEmail,
+                    u.senderPhone,
+                    u.package,
+                    u.status,
+                    u.activeModeType,
+                    u.adminMessage,
+                    getLockSource(u),
+                    u.livePassword,
+                    u.adminPass
+                ].join(' ').toLowerCase();
+                return blob.includes(q);
+            });
+        }
+
+        function renderStats(ids) {
+            const users = ids.map(id => allUsersData[id] || {});
+            const approved = users.filter(u => (u.status || 'TRIAL') === 'APPROVED').length;
+            const active = users.filter(u => u.isSelfControlActive === true).length;
+            const locked = users.filter(u => isAnyLockActive(u)).length;
+            document.getElementById('statTotal').textContent = users.length;
+            document.getElementById('statApproved').textContent = approved;
+            document.getElementById('statActive').textContent = active;
+            document.getElementById('statLocked').textContent = locked;
+        }
+
+        function renderUserList() {
+            const mount = document.getElementById('userList');
+            const ids = getFilteredUsers();
+            filteredDeviceIds = ids;
+            renderStats(ids);
+
+            if (!ids.length) {
+                mount.innerHTML = '<div class="empty-state">No matching devices found.</div>';
+                if (selectedDeviceId && !allUsersData[selectedDeviceId]) {
+                    selectedDeviceId = null;
+                    renderDetail();
+                }
+                return;
+            }
+
+            if (!selectedDeviceId || !allUsersData[selectedDeviceId] || !ids.includes(selectedDeviceId)) {
+                selectedDeviceId = ids[0];
+            }
+
+            mount.innerHTML = ids.map(deviceId => {
+                const u = allUsersData[deviceId] || {};
+                const profileName = u.profileName || 'Unnamed User';
+                const email = u.userEmail || 'No Email';
+                const status = u.status || 'TRIAL';
+                const focusActive = u.isSelfControlActive === true;
+                const lockSource = getLockSource(u);
+                
+                // Show notification dot if there's a new interaction
+                const isNewInteraction = Date.now() - (lastActivityMap[deviceId] || 0) < 60000; // Less than 1 min ago
+                const indicatorText = (u.liveChatUser && String(u.liveChatUser).trim()) ? '🔴 Chat' : (u.status === 'PENDING' ? '🟢 New Request' : '💬 Msg');
+                const indicator = isNewInteraction ? `<strong>${indicatorText}</strong>` : 'Idle';
+                
+                const pwd = getVisiblePassword(u);
+                
+                return `
+                    <div class="list-item ${selectedDeviceId === deviceId ? 'active' : ''}" onclick="selectUser('${deviceId}')">
+                        <div class="avatar">${escapeHtml(getInitials(profileName))}</div>
+                        <div class="item-main">
+                            <h3>${escapeHtml(profileName)}</h3>
+                            <div class="item-sub">${escapeHtml(email)}</div>
+                            <div class="device-code">${escapeHtml(deviceId)}</div>
+                            <div class="tiny-text" style="margin-top:6px;">${escapeHtml(u.senderPhone || 'No Phone')} • ${escapeHtml(u.package || '7 Days Trial')}</div>
+                            <div class="tiny-text" style="margin-top:6px;">Lock: <strong>${escapeHtml(lockSource)}</strong>${pwd ? ' • Pass: ' + escapeHtml(pwd) : ''}</div>
+                        </div>
+                        <div class="status-stack">
+                            <span class="status-badge ${getStatusClass(status)}">${escapeHtml(status)}</span>
+                            <span class="status-badge ${focusActive ? 'status-active' : 'status-inactive'}">${focusActive ? 'Focus ON' : 'Idle'}</span>
+                            <span class="tiny-text" style="color: ${isNewInteraction ? 'var(--danger)' : 'var(--muted)'}">${indicator}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            renderDetail();
+        }
+
+        function updateFeatureToggle(deviceId, field, value) {
+            db.collection('subscription_requests').doc(deviceId).update({ [field]: value });
+        }
+
+        function updatePackage(deviceId) {
+            const pkg = document.getElementById(`pkgSelect_${deviceId}`).value;
+            if (confirm(`Change package to ${pkg}? This will reset their countdown timer.`)) {
+                db.collection('subscription_requests').doc(deviceId).update({ package: pkg });
+            }
+        }
+
+        function buildDetailMarkup(deviceId) {
+            const req = allUsersData[deviceId];
+            if (!req) {
+                return `
+                    <div class="detail-panel">
+                        <div class="placeholder">
+                            <div class="placeholder-inner">
+                                <div class="placeholder-emoji">❔</div>
+                                <h2>User not found</h2>
+                                <p>Selected device data is no longer available.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const profileName = req.profileName || 'Unnamed User';
+            const email = req.userEmail || 'No Email';
+            const phone = req.senderPhone || 'No Phone';
+            const status = req.status || 'TRIAL';
+            const packageName = req.package || '7 Days Trial';
+            const isSelfControlActive = req.isSelfControlActive === true;
+            const activeType = req.activeModeType || 'None';
+            const timeRemaining = req.timeRemaining || '00:00';
+            const visiblePass = getVisiblePassword(req);
+            const lockSource = getLockSource(req);
+            const lockActive = isAnyLockActive(req);
+            
+            const chatUser = req.liveChatUser ? `<div class="bubble user"><strong>User</strong><br>${escapeHtml(req.liveChatUser)}</div>` : '';
+            const chatAdmin = req.liveChatAdmin ? `<div class="bubble admin"><strong>Admin</strong><br>${escapeHtml(req.liveChatAdmin)}</div>` : '';
+            const chatFallback = (!req.liveChatUser && !req.liveChatAdmin) ? `<div class="subtle">No live chat history yet.</div>` : '';
+            
+            const spinner = isSelfControlActive ? `<span class="spin-clock">🕒</span>` : `⏸️`;
+            const isAdultBlocked = req.adultBlock === true;
+
+            return `
+                <section class="detail-panel">
+                    <div class="detail-header">
+                        <div class="detail-title">
+                            <div class="avatar">${escapeHtml(getInitials(profileName))}</div>
+                            <div class="detail-meta">
+                                <h2>${escapeHtml(profileName)}</h2>
+                                <p>${escapeHtml(email)} • ${escapeHtml(phone)}<br><span class="device-code">${escapeHtml(deviceId)}</span></p>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            ${status === 'APPROVED'
+                                ? `<button class="danger-btn" onclick="updateStatus('${deviceId}','REVOKED')">🚫 Revoke</button>`
+                                : `<button class="success-btn" onclick="updateStatus('${deviceId}','APPROVED')">✅ Approve</button>`}
+                            <button class="secondary-btn" onclick="openBroadcastComposer('${deviceId}')">📨 Message</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-content">
+                        <div class="panel-grid">
+                            <div class="card span-6">
+                                <div class="card-header">
+                                    <h3 class="card-title">License & Package Settings</h3>
+                                    <span class="status-badge ${getStatusClass(status)}">${escapeHtml(status)}</span>
+                                </div>
+                                <div class="field-group">
+                                    <div class="kv-list" style="margin-bottom: 10px;">
+                                        <div class="kv-row"><strong>Current Package</strong><span>${escapeHtml(packageName)}</span></div>
+                                    </div>
+                                    <label>
+                                        <div class="field-label">Update Package Manually</div>
+                                        <select class="select" id="pkgSelect_${deviceId}">
+                                            <option value="7 Days Trial" ${packageName === '7 Days Trial' ? 'selected' : ''}>7 Days Trial</option>
+                                            <option value="6 Months (50 BDT)" ${packageName.includes('6 Months') ? 'selected' : ''}>6 Months</option>
+                                            <option value="1 Year (100 BDT)" ${packageName.includes('1 Year') ? 'selected' : ''}>1 Year</option>
+                                        </select>
+                                    </label>
+                                    <button class="primary-btn" style="width:100%; margin-top:5px;" onclick="updatePackage('${deviceId}')">Update & Reset Counter</button>
+                                </div>
+                            </div>
+                            
+                            <div class="card span-6">
+                                <div class="card-header">
+                                    <h3 class="card-title">Live App Toggles (Admin Override)</h3>
+                                </div>
+                                <div class="field-group">
+                                    <label class="toggle-line">
+                                        <span style="color:var(--danger)">Adult Protection (Works even if Revoked)</span>
+                                        <input type="checkbox" style="display:none;" id="chkAdult_${deviceId}" ${isAdultBlocked ? 'checked' : ''} onchange="updateFeatureToggle('${deviceId}', 'adultBlock', this.checked)">
+                                        <div class="toggle-switch"></div>
+                                    </label>
+                                    <div class="subtle" style="margin-bottom: 10px;">If revoked, user cannot turn this off. Only admin can toggle it from here.</div>
+                                    
+                                    <label class="toggle-line">
+                                        Block Facebook Reels
+                                        <input type="checkbox" style="display:none;" id="chkReels_${deviceId}" ${req.fbReelsBlock ? 'checked' : ''} onchange="updateFeatureToggle('${deviceId}', 'fbReelsBlock', this.checked)">
+                                        <div class="toggle-switch"></div>
+                                    </label>
+                                    
+                                    <label class="toggle-line">
+                                        Block YouTube Shorts
+                                        <input type="checkbox" style="display:none;" id="chkShorts_${deviceId}" ${req.ytShortsBlock ? 'checked' : ''} onchange="updateFeatureToggle('${deviceId}', 'ytShortsBlock', this.checked)">
+                                        <div class="toggle-switch"></div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="card span-6">
+                                <div class="card-header">
+                                    <h3 class="card-title">Remote Lock Control</h3>
+                                    <span class="subtle">View / edit / relock / unlock</span>
+                                </div>
+                                <div class="field-group">
+                                    <label>
+                                        <div class="field-label">Lock Password</div>
+                                        <input class="input" id="pass_${deviceId}" value="${escapeHtml(visiblePass)}" placeholder="Enter password for remote lock" />
+                                    </label>
+                                    <label>
+                                        <div class="field-label">Lock By</div>
+                                        <select class="select" id="lockType_${deviceId}">
+                                            <option value="developer" ${lockSource === 'Developer Lock' ? 'selected' : ''}>Developer Lock</option>
+                                            <option value="friend" ${lockSource === 'Friend Lock' ? 'selected' : ''}>Friend Lock</option>
+                                        </select>
+                                    </label>
+                                    <div class="inline-actions">
+                                        <button class="primary-btn" onclick="lockDevice('${deviceId}')">🔒 Lock Now</button>
+                                        <button class="secondary-btn" onclick="relockDevice('${deviceId}')">♻️ Edit + Relock</button>
+                                        <button class="danger-btn" onclick="unlockDevice('${deviceId}')">🔓 Unlock</button>
+                                    </div>
+                                    <div class="subtle">
+                                        Lock Now / Edit + Relock updates password instantly.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card span-6">
+                                <div class="card-header">
+                                    <h3 class="card-title">Dashboard Static Message</h3>
+                                    <span class="subtle">Shown permanently at bottom of app</span>
+                                </div>
+                                <div class="field-group">
+                                    <textarea class="textarea" id="static_${deviceId}" placeholder="Write an admin dashboard note...">${escapeHtml(req.adminMessage || '')}</textarea>
+                                    <div class="inline-actions">
+                                        <button class="primary-btn" onclick="saveStaticMsg('${deviceId}')">💾 Save Message</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card span-6">
+                                <div class="card-header">
+                                    <h3 class="card-title">Live Chat</h3>
+                                    <span class="subtle">Direct admin ↔ user communication</span>
+                                </div>
+                                <div class="chat-stream" id="chatStream_${deviceId}">
+                                    ${chatUser}${chatAdmin}${chatFallback}
+                                </div>
+                                <div class="chat-compose">
+                                    <input class="input" id="chatInput_${deviceId}" placeholder="Type admin reply..." onkeypress="handleChatEnter(event, '${deviceId}')" />
+                                    <button class="primary-btn" onclick="sendLiveReply('${deviceId}')">Send</button>
+                                </div>
+                            </div>
+                            
+                            <div class="card span-6">
+                                <div class="card-header">
+                                    <h3 class="card-title">Current Lock State</h3>
+                                    ${getLockBadge(req)}
+                                </div>
+                                <div class="lock-health">
+                                    <div class="mini-lock-card">
+                                        <div class="k">Lock Source</div>
+                                        <div class="v">${escapeHtml(lockSource)}</div>
+                                    </div>
+                                    <div class="mini-lock-card">
+                                        <div class="k">Running State</div>
+                                        <div class="v" style="color:var(--primary)">${isSelfControlActive ? '🟢 Active ' + spinner : '⚪ Stopped'}</div>
+                                    </div>
+                                    <div class="mini-lock-card" style="grid-column: span 2;">
+                                        <div class="k">Time Left</div>
+                                        <div class="v">${escapeHtml(timeRemaining)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card span-12">
+                                <div class="card-header">
+                                    <h3 class="card-title">Broadcast Center (Live Popup)</h3>
+                                    <span class="subtle">Global or targeted popup push (Shows in middle of screen)</span>
+                                </div>
+                                <div class="broadcast-banner">
+                                    <label>
+                                        <div class="field-label">Announcement / Popup Message</div>
+                                        <textarea class="textarea" style="min-height: 80px;" id="broadcastText_${deviceId}" placeholder="Write message for all devices or this device..."></textarea>
+                                    </label>
+                                    <div class="inline-actions">
+                                        <button class="primary-btn" onclick="sendBroadcastToAll('broadcastText_${deviceId}')">🚀 Send Popup to All Devices</button>
+                                        <button class="secondary-btn" onclick="sendBroadcastToSingle('${deviceId}','broadcastText_${deviceId}')">📍 Send Popup to This Device</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderDetail() {
+            const desktop = document.getElementById('desktopDetail');
+            const mobile = document.getElementById('mobileDetailMount');
+
+            // Preserve input focus
+            let activeEl = document.activeElement;
+            let activeId = activeEl ? activeEl.id : null;
+            let isTypingArea = activeEl && ['INPUT', 'TEXTAREA'].includes(activeEl.tagName);
+            let activeVal = null; let selStart = 0;
+            
+            if (activeId && isTypingArea) { 
+                activeVal = activeEl.value; 
+                try { selStart = activeEl.selectionStart; } catch(e) {} 
+            }
+
+            if (!selectedDeviceId || !allUsersData[selectedDeviceId]) {
+                const emptyHtml = `
+                    <section class="detail-panel">
+                        <div class="placeholder">
+                            <div class="placeholder-inner">
+                                <div class="placeholder-emoji">📲</div>
+                                <h2>Select a user/device</h2>
+                                <p>Left side list থেকে user select করলে এখানে control panel show হবে।</p>
+                            </div>
+                        </div>
+                    </section>
+                `;
+                desktop.innerHTML = emptyHtml;
+                mobile.innerHTML = emptyHtml;
+                return;
+            }
+            
+            const markup = buildDetailMarkup(selectedDeviceId);
+            desktop.innerHTML = markup;
+            mobile.innerHTML = markup;
+
+            // Restore focus
+            if (activeId && isTypingArea) {
+                let restoredEl = document.getElementById(activeId);
+                if (restoredEl) { 
+                    restoredEl.focus(); 
+                    restoredEl.value = activeVal; 
+                    try { restoredEl.setSelectionRange(selStart, selStart); } catch(e) {} 
+                }
+            }
+        }
+
+        function selectUser(deviceId) {
+            selectedDeviceId = deviceId;
+            renderUserList();
+            if (window.innerWidth <= 900) {
+                document.getElementById('mobileOverlay').classList.add('open');
+            }
+        }
+
+        function closeMobileDetail() {
+            document.getElementById('mobileOverlay').classList.remove('open');
+        }
+
+        function refreshSelection() {
+            renderUserList();
+        }
+
+        function filterUsers() {
+            renderUserList();
+        }
+
+        function updateStatus(deviceId, newStatus) {
+            if (!confirm(`Change license status to ${newStatus}?`)) return;
+            db.collection('subscription_requests').doc(deviceId).update({ status: newStatus });
+        }
+
+        function saveStaticMsg(deviceId) {
+            const field = document.getElementById(`static_${deviceId}`);
+            if (!field) return;
+            db.collection('subscription_requests').doc(deviceId).update({ adminMessage: field.value || '' })
+                .then(() => alert('Dashboard message updated successfully.'));
+        }
+
+        function getSelectedLockType(deviceId) {
+            return document.getElementById(`lockType_${deviceId}`)?.value || 'developer';
+        }
+
+        function getPasswordField(deviceId) {
+            return (document.getElementById(`pass_${deviceId}`)?.value || '').trim();
+        }
+
+        function buildLockPayload(deviceId) {
+            const pass = getPasswordField(deviceId);
+            const lockType = getSelectedLockType(deviceId);
+            if (!pass) {
+                alert('Please enter a lock password first.');
+                return null;
+            }
+
+            const payload = {
+                adminCmd: 'START_FOCUS',
+                livePassword: pass
+            };
+
+            if (lockType === 'developer') {
+                payload.adminPass = pass;
+            } else {
+                payload.adminPass = '';
+            }
+
+            return payload;
+        }
+
+        function lockDevice(deviceId) {
+            const payload = buildLockPayload(deviceId);
+            if (!payload) return;
+            if (!confirm('Lock this device with the entered password?')) return;
+            db.collection('subscription_requests').doc(deviceId).update(payload)
+                .then(() => alert('Device locked successfully.'));
+        }
+
+        function relockDevice(deviceId) {
+            const payload = buildLockPayload(deviceId);
+            if (!payload) return;
+            if (!confirm('Update password and relock this device now?')) return;
+            db.collection('subscription_requests').doc(deviceId).update(payload)
+                .then(() => alert('Password updated and relock sent.'));
+        }
+
+        function unlockDevice(deviceId) {
+            if (!confirm('Unlock this device immediately?')) return;
+            db.collection('subscription_requests').doc(deviceId).update({
+                adminCmd: 'STOP_FOCUS',
+                adminPass: '',
+                livePassword: ''
+            }).then(() => {
+                alert('Unlock command sent.');
+                renderDetail();
+            });
+        }
+
+        function sendLiveReply(deviceId) {
+            const input = document.getElementById(`chatInput_${deviceId}`);
+            const msg = input ? input.value.trim() : '';
+            if (!msg) return;
+            db.collection('subscription_requests').doc(deviceId).update({ liveChatAdmin: msg }).then(() => {
+                if (input) input.value = '';
+            });
+        }
+
+        function handleChatEnter(event, deviceId) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendLiveReply(deviceId);
+            }
+        }
+
+        function openBroadcastComposer(deviceId = null) {
+            if (deviceId) {
+                const field = document.getElementById(`broadcastText_${deviceId}`);
+                if (field) {
+                    field.focus();
+                    field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (window.innerWidth <= 900) document.getElementById('mobileOverlay').classList.add('open');
+                    return;
+                }
+            }
+            alert('Select a device first to open the detailed message composer, or use the visible broadcast button from any selected device.');
+        }
+
+        function sendBroadcastToSingle(deviceId, inputId) {
+            const field = document.getElementById(inputId);
+            const msg = field ? field.value.trim() : '';
+            if (!msg) {
+                alert('Please type a message first.');
+                return;
+            }
+            if (!confirm('Send this popup only to the selected device?')) return;
+            db.collection('subscription_requests').doc(deviceId).update({ broadcastMsg: msg })
+                .then(() => {
+                    alert('Message sent to selected device.');
+                    field.value = '';
+                });
+        }
+
+        function sendBroadcastToAll(inputId) {
+            const field = document.getElementById(inputId);
+            const msg = field ? field.value.trim() : '';
+            if (!msg) {
+                alert('Please type a message first.');
+                return;
+            }
+            if (!confirm('Push this popup to ALL devices?')) return;
+
+            db.collection('subscription_requests').get().then((querySnapshot) => {
+                const batch = db.batch();
+                querySnapshot.forEach((doc) => {
+                    batch.update(db.collection('subscription_requests').doc(doc.id), { broadcastMsg: msg });
+                });
+                return batch.commit();
+            }).then(() => {
+                alert('Broadcast sent successfully to all devices.');
+                if (field) field.value = '';
+            }).catch(err => alert('Error: ' + err.message));
+        }
+
+        // --- Firebase Snapshot Logic (Modified for Safe Initial Load) ---
+        let initialLoad = true;
+        
+        db.collection('subscription_requests').onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const docId = change.doc.id;
+                const newData = change.doc.data();
+
+                if (change.type === 'added') {
+                    allUsersData[docId] = newData;
+                    
+                    // If it's the very first time loading the page, set a base time for sorting.
+                    // If a new device is added later (not on initial load), bump it to the top.
+                    let baseTime = initialLoad ? 0 : Date.now(); 
+                    
+                    if (newData.status === 'PENDING') baseTime = Date.now() + 1000; // Priority to pending
+                    lastActivityMap[docId] = baseTime;
+                }
+                
+                if (change.type === 'modified') {
+                    const oldData = allUsersData[docId] || {};
+                    allUsersData[docId] = newData;
+                    
+                    // Bump to top if new chat message or new form submission
+                    const isNewMsg = newData.liveChatUser !== oldData.liveChatUser && newData.liveChatUser;
+                    const isNewForm = newData.status === 'PENDING' && oldData.status !== 'PENDING';
+                    
+                    if (isNewMsg || isNewForm) {
+                        lastActivityMap[docId] = Date.now();
+                    }
+                }
+                
+                if (change.type === 'removed') {
+                    delete allUsersData[docId];
+                    delete lastActivityMap[docId];
+                }
+            });
+            
+            initialLoad = false; // Turn off initial load flag after first fetch
+            renderUserList();
+            
+        }, (error) => {
+            document.getElementById('userList').innerHTML = `<div class="empty-state">Firebase load error: ${escapeHtml(error.message)}</div>`;
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 900) closeMobileDetail();
+        });
+    </script>
+</body>
+</html>

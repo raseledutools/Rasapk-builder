@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্মুথ এডিটর - HTML ও PDF ডাউনলোড</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+        }
+        header {
+            background: #1e1e1e;
+            color: #00ff88;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            border: none;
+            padding: 6px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.8; }
+        .btn-html { background: #007acc; color: white; }
+        .btn-pdf { background: #ff4757; color: white; }
+
+        .wrapper {
+            display: flex;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        #editor-container {
+            width: 40%;
+            min-width: 50px;
+            max-width: 80%;
+            background: #1e1e1e;
+        }
+        textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            color: #d4d4d4;
+            border: none;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 15px;
+            outline: none;
+            resize: none;
+            box-sizing: border-box;
+        }
+        #resizer {
+            width: 6px;
+            cursor: col-resize;
+            background: #333;
+            z-index: 10;
+        }
+        #resizer:hover, #resizer.active { background: #007acc; }
+        
+        #preview-container {
+            flex: 1;
+            background: white;
+            position: relative;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: none;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-size: 14px;">লাইভ এডিটর</div>
+    <div class="controls">
+        <button class="btn-html" onclick="downloadHTML()">Download HTML</button>
+        <button class="btn-pdf" onclick="downloadPDF()">Download PDF</button>
+    </div>
+</header>
+
+<div class="wrapper">
+    <div id="editor-container">
+        <textarea id="html-code" placeholder="এখানে কোড লিখুন..."></textarea>
+    </div>
+    <div id="resizer"></div>
+    <div id="preview-container">
+        <div id="overlay"></div>
+        <iframe id="output-view"></iframe>
+    </div>
+</div>
+
+<script>
+    const editor = document.getElementById('editor-container');
+    const resizer = document.getElementById('resizer');
+    const textarea = document.getElementById('html-code');
+    const iframe = document.getElementById('output-view');
+    const overlay = document.getElementById('overlay');
+
+    let isResizing = false;
+
+    // রিসাইজিং লজিক
+    resizer.addEventListener('mousedown', () => {
+        isResizing = true;
+        overlay.style.display = 'block';
+        resizer.classList.add('active');
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        let newWidth = e.clientX;
+        if (newWidth > 50 && newWidth < window.innerWidth - 50) {
+            editor.style.width = newWidth + 'px';
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        isResizing = false;
+        overlay.style.display = 'none';
+        resizer.classList.remove('active');
+    });
+
+    // লাইভ প্রিভিউ
+    textarea.addEventListener('input', () => {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(textarea.value);
+        doc.close();
+    });
+
+    // HTML ডাউনলোড ফাংশন
+    function downloadHTML() {
+        const blob = new Blob([textarea.value], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'index.html';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // PDF ডাউনলোড ফাংশন
+    function downloadPDF() {
+        const element = iframe.contentDocument.body;
+        const opt = {
+            margin:       1,
+            filename:     'preview.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        
+        // PDF তৈরি করা শুরু
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // ডেমো টেক্সট
+    textarea.value = "<h1>Hello PDF!</h1>\n<p>এই পেজটি এখন PDF হিসেবে ডাউনলোড করা যাবে।</p>\n<div style='background: gold; padding: 20px;'>স্টাইলসহ ডাউনলোড হবে!</div>";
+    textarea.dispatchEvent(new Event('input'));
+</script>
+<script type="module" src="tracker.js"></script>
+</body>
+
+</html>

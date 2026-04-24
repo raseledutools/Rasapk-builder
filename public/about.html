@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parental Control Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e2f;
+            --text-main: #ffffff;
+            --text-muted: #a0a0b0;
+            --primary: #00d2ff;
+            --danger: #ff4b4b;
+            --success: #00e676;
+            --warning: #ffb300;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
+        h1 { text-align: center; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); border-top: 4px solid var(--primary); }
+        .card h2 { margin-top: 0; font-size: 1.2em; color: var(--text-muted); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { padding: 12px; border: none; border-radius: 6px; font-size: 1em; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .btn-danger { background-color: var(--danger); }
+        .btn-success { background-color: var(--success); color: #000; }
+        .btn-warning { background-color: var(--warning); color: #000; }
+        .btn-primary { background-color: var(--primary); color: #000; }
+        input[type="text"] { width: 100%; padding: 12px; background: #2a2a3d; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; font-size: 1em; }
+    </style>
+</head>
+<body>
+
+    <h1>পিসি মনিটরিং ড্যাশবোর্ড</h1>
+
+    <div class="dashboard-grid">
+        
+        <div class="card" style="border-top: 4px solid var(--success);">
+            <h2>🎯 ফোকাস মোড (Focus Mode)</h2>
+            <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 15px;">এটি অন থাকলে টাস্ক ম্যানেজার ব্লক থাকবে এবং জেমিনি ছাড়া অন্য সব ওয়েবসাইট বন্ধ হয়ে যাবে। অফ থাকলে পিসি নরমাল থাকবে।</p>
+            <div class="btn-grid">
+                <button class="btn-success" onclick="setFocusMode('ON')">🟢 Focus ON করুন</button>
+                <button class="btn-danger" style="background:#8b0000;" onclick="setFocusMode('OFF')">🔴 Focus OFF করুন</button>
+            </div>
+            <p id="focus-status" style="text-align: center; margin-top: 10px; font-weight: bold; color: var(--primary);">Current: Checking...</p>
+        </div>
+
+        <div class="card">
+            <h2>রিমোট কন্ট্রোল প্যানেল</h2>
+            <div class="btn-grid" style="grid-template-columns: 1fr;">
+                <button class="btn-danger" style="background:#8b0000;" onclick="sendAction('SHUTDOWN')">⚡ শাটডাউন</button>
+            </div>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1; border-top: 4px solid var(--danger);">
+            <h2>কিওয়ার্ড ও ওয়েবসাইট ব্লকার (Keyword Blocker)</h2>
+            <p style="color: var(--text-muted); font-size: 0.9em;">যে শব্দ বা ওয়েবসাইটের নামগুলো সার্চ করা বা টাইপ করা বন্ধ করতে চান, সেগুলো কমা (,) দিয়ে লিখুন।</p>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="blocked-keywords-input" placeholder="e.g. facebook, tiktok, badword">
+                <button class="btn-danger" style="width: 150px;" onclick="updateBlockedKeywords()">আপডেট করুন</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const FB_URL = "https://mywebtools-f8d53-default-rtdb.firebaseio.com/";
+        const API_KEY = "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY";
+        const SYNC_ID = "rasel-mia-universal-sync";
+
+        function setFocusMode(state) {
+            fetch(`${FB_URL}commands/${SYNC_ID}/focus_mode.json?auth=${API_KEY}`, {
+                method: 'PUT',
+                body: JSON.stringify(state)
+            }).then(res => {
+                if(res.ok) {
+                    alert("✅ Focus Mode " + state + " করা হয়েছে!");
+                    document.getElementById('focus-status').innerText = "Current: " + state;
+                }
+            });
+        }
+
+        function sendAction(actionType) {
+            fetch(`${FB_URL}commands/${SYNC_ID}/action.json?auth=${API_KEY}`, {
+                method: 'PUT',
+                body: JSON.stringify(actionType)
+            }).then(res => {
+                if(res.ok) alert("✅ কমান্ড পাঠানো হয়েছে: " + actionType);
+            });
+        }
+
+        function updateBlockedKeywords() {
+            const keywordsStr = document.getElementById('blocked-keywords-input').value;
+            fetch(`${FB_URL}commands/${SYNC_ID}/blocked_keywords.json?auth=${API_KEY}`, {
+                method: 'PUT',
+                body: JSON.stringify(keywordsStr)
+            }).then(res => {
+                if(res.ok) alert("✅ কাস্টম কিওয়ার্ড আপডেট করা হয়েছে!");
+            });
+        }
+
+        function loadCurrentData() {
+            fetch(`${FB_URL}commands/${SYNC_ID}/focus_mode.json?auth=${API_KEY}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data) document.getElementById('focus-status').innerText = "Current: " + data;
+                });
+            
+            fetch(`${FB_URL}commands/${SYNC_ID}/blocked_keywords.json?auth=${API_KEY}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data && data !== "NONE") document.getElementById('blocked-keywords-input').value = data;
+                });
+        }
+
+        setInterval(loadCurrentData, 5000);
+        loadCurrentData();
+    </script>
+</body>
+</html>

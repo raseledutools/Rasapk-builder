@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Manager | Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f1f5f9; }
+        .glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 selection:bg-pink-500/30">
+
+    <div class="max-w-2xl w-full glass p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
+        
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-pink-500/10 rounded-full flex items-center justify-center mb-4 mx-auto border border-pink-500/20">
+                <i class="fa-solid fa-server text-2xl text-pink-500"></i>
+            </div>
+            <h1 class="text-3xl font-black text-white uppercase tracking-tighter">Exam Controller</h1>
+            <p class="text-slate-400 text-sm mt-2 font-medium">Upload new live exam. Previous one will be archived automatically.</p>
+        </div>
+
+        <form id="admin-exam-form" class="space-y-5">
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-pink-400 mb-2 ml-1">Admin Password</label>
+                <input type="password" id="admin-pass" required placeholder="Enter secret password"
+                    class="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-pink-500 transition-all font-bold">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 ml-1">Live Exam Title</label>
+                <input type="text" id="exam-title" required placeholder="Example: BWDB Assistant Engineer 2026"
+                    class="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-pink-500 transition-all font-bold">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 ml-1">Exam Subtitle / Info</label>
+                <input type="text" id="exam-subtitle" required placeholder="Example: 50 Marks | Time: 30 Mins"
+                    class="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-pink-500 transition-all font-bold">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 ml-1">Questions Data (TXT Format)</label>
+                <textarea id="exam-data" required rows="6" placeholder="Question|Opt1|Opt2|Opt3|Opt4|CorrectIndex"
+                    class="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-white focus:outline-none focus:border-pink-500 transition-all font-mono text-xs"></textarea>
+                <p class="text-[9px] text-slate-500 mt-2 font-bold uppercase tracking-widest px-2">Format: Question|A|B|C|D|0 (0 = first option correct)</p>
+            </div>
+
+            <button type="submit" id="publish-btn"
+                class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg shadow-pink-600/20 active:scale-95">
+                <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Publish Live Exam
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a href="exam.html" class="text-slate-500 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 bg-emerald-600 text-white rounded-full font-bold shadow-2xl animate-bounce flex items-center gap-2">
+        <i class="fa-solid fa-circle-check"></i> <span>Exam successfully updated & archived!</span>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // 🔥 Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53",
+            storageBucket: "mywebtools-f8d53.firebasestorage.app",
+            messagingSenderId: "979594414301",
+            appId: "1:979594414301:web:7048c995e56e331a85f334"
+        };
+
+        const appId = "rasel-mia-universal-sync";
+        const SECRET_PASSWORD = "rasel123";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const examForm = document.getElementById('admin-exam-form');
+        const toast = document.getElementById('toast');
+        const publishBtn = document.getElementById('publish-btn');
+
+        // Form Submit Logic
+        examForm.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const pass = document.getElementById('admin-pass').value;
+            if (pass !== SECRET_PASSWORD) {
+                alert("Incorrect Admin Password!");
+                return;
+            }
+
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...';
+
+            try {
+                await signInAnonymously(auth);
+
+                const title = document.getElementById('exam-title').value.trim();
+                const subtitle = document.getElementById('exam-subtitle').value.trim();
+                const questionsRaw = document.getElementById('exam-data').value.trim();
+
+                const liveExamRef = doc(db, 'artifacts', appId, 'public', 'data', 'live_exam', 'current');
+                const archivesRef = collection(db, 'artifacts', appId, 'public', 'data', 'exam_archives');
+
+                // Step 1: Check jodi ager kono Live Exam theke thake, sheta Archive e pathabo
+                const currentLiveSnap = await getDoc(liveExamRef);
+                if (currentLiveSnap.exists()) {
+                    const oldData = currentLiveSnap.data();
+                    await addDoc(archivesRef, oldData);
+                    console.log("Old exam moved to archive.");
+                }
+
+                // Step 2: Notun Data diye Live Exam update korbo
+                await setDoc(liveExamRef, {
+                    title: title,
+                    subtitle: subtitle,
+                    questions: questionsRaw,
+                    timestamp: Date.now().toString()
+                });
+
+                // Success
+                toast.classList.remove('hidden');
+                examForm.reset();
+                setTimeout(() => toast.classList.add('hidden'), 4000);
+
+            } catch (err) {
+                console.error(err);
+                alert("Database Error: " + err.message);
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Publish Live Exam';
+            }
+        };
+    </script>
+</body>
+</html>

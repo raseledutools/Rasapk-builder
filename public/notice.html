@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta property="og:url" content="https://raseledutools.github.io/notice" />
+<meta property="og:title" content="Notice - Rasel Edu Tools" />
+<link rel="canonical" href="https://raseledutools.github.io/notice">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notice Board | Web Tools Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #f8fafc;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(to bottom, rgba(0, 15, 30, 0.4) 0%, rgba(5, 15, 35, 0.7) 50%, rgba(2, 6, 15, 0.95) 100%),
+                url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2500&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        @keyframes pageLoad {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-enter {
+            animation: pageLoad 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        /* Section Title Style */
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 50%;
+            height: 4px;
+            background: linear-gradient(90deg, #ec4899, #8b5cf6);
+            border-radius: 2px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(3, 7, 18, 0.8); }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen selection:bg-pink-500/40 selection:text-white animate-enter">
+
+    <!-- Header Section -->
+    <header class="pt-16 pb-8 text-center px-4 relative z-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-3 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-pink-100 to-purple-200 drop-shadow-lg">
+            Notice Board
+        </h1>
+        <p class="text-slate-300 text-base max-w-2xl mx-auto font-medium mb-6">
+            Ekhane aapnar shob dorkari link ebong PDF document gulo paoya jabe.
+        </p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 pb-24 relative z-10">
+        <div class="max-w-6xl mx-auto">
+
+            <!-- SECTION 1: Essential Links (From 1.txt) -->
+            <div class="mb-16">
+                <h2 class="text-3xl font-bold text-white section-title">Essential Links</h2>
+                
+                <div id="links-container" class="mt-4">
+                    <div class="flex items-center justify-center p-10 bg-black/20 rounded-xl border border-white/10 backdrop-blur-sm">
+                        <i class="fa-solid fa-spinner fa-spin text-3xl text-pink-500"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: PDF Files Table (From 2.txt) -->
+            <div>
+                <h2 class="text-3xl font-bold text-white section-title">PDF Documents</h2>
+                
+                <div id="pdf-container">
+                    <div class="flex items-center justify-center p-10 bg-black/20 rounded-xl border border-white/10 backdrop-blur-sm mt-4">
+                        <i class="fa-solid fa-spinner fa-spin text-3xl text-red-500"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Fixed Floating Home Button -->
+    <a href="index.html" class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-pink-500 to-purple-600 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-[0_10px_25px_rgba(236,72,153,0.5)] hover:shadow-[0_15px_35px_rgba(236,72,153,0.7)] hover:scale-110 transition-all duration-300 group">
+        <i class="fa-solid fa-house text-xl"></i>
+        <!-- Tooltip -->
+        <span class="absolute right-full mr-4 bg-black/80 backdrop-blur-sm text-white text-sm font-semibold px-4 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 shadow-lg">
+            Back to Dashboard
+        </span>
+    </a>
+
+    <!-- Dynamic Script For Loading txt and PDF -->
+    <script>
+        // Table toiri korar function (Essential Links er jonno)
+        function renderTableFromText(text) {
+            const container = document.getElementById('links-container');
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            
+            if (lines.length === 0) {
+                container.innerHTML = `<div class="p-5 bg-red-500/20 border border-red-500/50 text-white text-center rounded-xl">File-e kono data nei!</div>`;
+                return;
+            }
+
+            let tableHTML = `
+            <div class="bg-slate-900/60 rounded-xl border border-white/10 overflow-hidden backdrop-blur-sm shadow-xl">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-black/40 text-pink-300">
+                            <th class="p-4 border-b border-white/10 font-semibold w-16 text-center">No.</th>
+                            <th class="p-4 border-b border-white/10 font-semibold">Website Title / URL</th>
+                            <th class="p-4 border-b border-white/10 font-semibold text-right pr-6">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            lines.forEach((line, index) => {
+                let parts = line.split(',');
+                let title = parts[0].trim();
+                let url = parts.length > 1 ? parts.slice(1).join(',').trim() : title;
+                
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+
+                tableHTML += `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td class="p-4 text-white/50 text-center">${index + 1}</td>
+                        <td class="p-4 text-white font-medium text-lg">
+                            ${title}
+                        </td>
+                        <td class="p-4 text-right pr-6">
+                            <a href="${url}" target="_blank" class="bg-pink-500/20 hover:bg-pink-500 text-pink-300 hover:text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all border border-pink-500/30 hover:border-transparent inline-flex items-center gap-2 shadow-lg">
+                                Visit <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `</tbody></table></div>`;
+            container.innerHTML = tableHTML;
+        }
+
+        // 1.txt theke Data Load korar logic (Automatic)
+        async function loadLinksFromTxt() {
+            const container = document.getElementById('links-container');
+
+            try {
+                const response = await fetch('1.txt');
+                if (!response.ok) throw new Error('File not found');
+                const text = await response.text();
+                renderTableFromText(text);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="bg-black/30 border border-white/10 rounded-xl p-8 text-center text-white/60 backdrop-blur-sm">
+                        <i class="fa-solid fa-file-circle-exclamation text-5xl mb-4 text-white/20"></i>
+                        <h3 class="text-xl font-bold text-white mb-2">1.txt File Paoya Jayni</h3>
+                        <p>Ekoi folder e <span class="text-pink-400 font-bold">1.txt</span> name ekti file toiri korun.</p>
+                        <p class="mt-3 text-sm text-yellow-300/80 bg-black/40 px-4 py-2 rounded-lg inline-block border border-yellow-500/20">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Local PC-te double-click kore open korle browser file porte dey na. GitHub-e upload korle automatic kaj korbe.
+                        </p>
+                    </div>`;
+            }
+        }
+
+        // PDF List Table Toiri korar function (2.txt theke)
+        function renderPDFTableFromText(text) {
+            const container = document.getElementById('pdf-container');
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            
+            if (lines.length === 0) {
+                container.innerHTML = `<div class="p-5 bg-red-500/20 border border-red-500/50 text-white text-center rounded-xl mt-4">File-e kono data nei!</div>`;
+                return;
+            }
+
+            let tableHTML = `
+            <div class="bg-slate-900/60 rounded-xl border border-white/10 overflow-hidden backdrop-blur-sm shadow-xl mt-4">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-black/40 text-pink-300">
+                            <th class="p-4 border-b border-white/10 font-semibold w-16 text-center text-lg">No</th>
+                            <th class="p-4 border-b border-white/10 font-semibold text-lg">Headlines</th>
+                            <th class="p-4 border-b border-white/10 font-semibold text-center w-36 text-lg">Attested PDF</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            lines.forEach((line) => {
+                let parts = line.split(',');
+                let id = parts[0].trim();
+                let description = parts.length > 1 ? parts.slice(1).join(',').trim() : "বিস্তারিত বিবরণ দেওয়া নেই";
+
+                tableHTML += `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                        <td class="p-4 text-white/70 text-center text-lg font-medium">${id}</td>
+                        <td class="p-4 text-white font-medium text-base leading-relaxed">
+                            ${description}
+                        </td>
+                        <td class="p-4 text-center">
+                            <a href="${id}.pdf" target="_blank" download="${id}.pdf" class="inline-flex flex-col items-center justify-center text-red-400 hover:text-red-300 hover:scale-110 transition-all p-2 rounded-lg hover:bg-red-500/10">
+                                <i class="fa-regular fa-file-pdf text-3xl mb-1"></i>
+                                <span class="text-[10px] font-bold tracking-widest uppercase">PDF</span>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `</tbody></table></div>`;
+            container.innerHTML = tableHTML;
+        }
+
+        // 2.txt theke Data Load korar logic (Automatic)
+        async function loadPDFsFromTxt() {
+            const container = document.getElementById('pdf-container');
+
+            try {
+                const response = await fetch('2.txt');
+                if (!response.ok) throw new Error('File not found');
+                const text = await response.text();
+                renderPDFTableFromText(text);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="bg-black/30 border border-white/10 rounded-xl p-8 text-center text-white/60 backdrop-blur-sm mt-4">
+                        <i class="fa-solid fa-file-circle-exclamation text-5xl mb-4 text-white/20"></i>
+                        <h3 class="text-xl font-bold text-white mb-2">2.txt File Paoya Jayni</h3>
+                        <p>Ekoi folder e <span class="text-pink-400 font-bold">2.txt</span> name ekti file toiri korun.</p>
+                        <p class="mt-3 text-sm text-yellow-300/80 bg-black/40 px-4 py-2 rounded-lg inline-block border border-yellow-500/20">
+                            <i class="fa-solid fa-circle-info mr-1"></i> Format: 1, ekhane notice er bistarito likhun
+                        </p>
+                    </div>`;
+            }
+        }
+
+        // Script gulo ekhane call kora hochhe
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLinksFromTxt();
+            loadPDFsFromTxt();
+        });
+    </script>
+    <script type="module" src="tracker.js"></script>
+</body>
+</html>
+
+
