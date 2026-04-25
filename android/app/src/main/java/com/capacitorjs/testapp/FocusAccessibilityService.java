@@ -51,7 +51,7 @@ public class FocusAccessibilityService extends AccessibilityService {
             "“লজ্জাশীলতা ঈমানের অঙ্গ।”\n- (সহিহ মুসলিম)",
             "“যে ব্যক্তি মন্দ কাজ থেকে বিরত থাকে, সে যেন ভালো কাজই করল।”",
             "“আল্লাহ তার বান্দার তওবা কবুল করেন যতক্ষণ না তার মৃত্যুযন্ত্রণা শুরু হয়।”",
-            "“যে মনকে নিয়ন্ত্রণ করতে পারে না, তার মন তার সবচেয়ে বড় শত্রু।”\n- (ভগবদ্গীতা)",
+            "“যে মনকে নিয়ন্ত্রণ করতে পারে মহাশক্তিধর।”\n- (ভগবদ্গীতা)",
             "“কাম, ক্রোধ এবং লোভ—এই তিনটি নরকের দ্বার।”\n- (ভগবদ্গীতা)",
             "“সফলতা আসে ফোকাস থেকে, ডিস্ট্রাকশন থেকে নয়।”",
             "“আজকের সময় নষ্ট মানে, কালকের স্বপ্ন নষ্ট।”",
@@ -175,28 +175,34 @@ public class FocusAccessibilityService extends AccessibilityService {
 
         backgroundExecutor.execute(() -> {
 
-            // ===================================================================
-            // লজিক 0: "Take a Break" প্রোটেকশন (ফোন অ্যাপ ছাড়া সব লক)
-            // ===================================================================
             SharedPreferences prefs = getSharedPreferences("RasFocusPrefs", MODE_PRIVATE);
+            
+            // ===================================================================
+            // লজিক 0: "Take a Break" প্রোটেকশন (ফোন অ্যাপ ছাড়া সব লক)
+            // ===================================================================
             long breakUntil = prefs.getLong("break_until", 0);
             
             if (System.currentTimeMillis() < breakUntil) {
-                // ডায়ালার, কন্টাক্ট এবং ইনকামিং কলের অ্যাপগুলোকে ছাড় দেওয়া হয়েছে
                 boolean isPhoneApp = packageName.contains("dialer") || 
                                      packageName.contains("telecom") || 
                                      packageName.contains("incallui") || 
                                      packageName.contains("contacts") ||
-                                     packageName.equals("com.capacitorjs.app.testapp"); // নিজের UI বাদে
+                                     packageName.equals("com.capacitorjs.app.testapp"); 
 
                 if (!isPhoneApp) {
                     mainHandler.post(() -> {
                         performGlobalAction(GLOBAL_ACTION_HOME);
-                        showSafetyOverlayCustom("Focus Mode Active!\n\nPlease wait until your break time ends. Stay productive.");
+                        showSafetyOverlayCustom("Focus Mode Active!\n\nPlease wait until your break time ends. Stay productive.", false);
                     });
-                    return; // ব্রেক চললে আর কোনো স্ক্যানিং দরকার নেই
+                    return; 
                 }
             }
+
+            // ===================================================================
+            // মাস্টার টগল চেক (বাই ডিফল্ট true থাকবে)
+            // ===================================================================
+            boolean isBlockingActive = prefs.getBoolean("is_blocking_active", true);
+            if (!isBlockingActive) return; // ইউজার অফ করে রাখলে স্ক্যানিং হবে না
 
             // ===================================================================
             // লজিক ১: টাইপিং প্রোটেকশন (লেখা মুছবে এবং হাদিস পপ-আপ দেখাবে)
@@ -210,7 +216,7 @@ public class FocusAccessibilityService extends AccessibilityService {
             if (rootNode == null) return;
 
             // ===================================================================
-            // লজিক ৪: Shorts & Reels প্রোটেকশন (Back করে Home-এ পাঠাবে)
+            // লজিক ৪: Shorts & Reels প্রোটেকশন
             // ===================================================================
             String shortReelType = detectShortsOrReels(rootNode, packageName);
             if (shortReelType != null) {
@@ -227,29 +233,28 @@ public class FocusAccessibilityService extends AccessibilityService {
                 return; 
             }
 
-            boolean shouldBlockScreen = false;
-
             // ===================================================================
-            // লজিক ৩: আনইনস্টল এবং ফ্রিজার অ্যাপ প্রোটেকশন
+            // লজিক ৩: আনইনস্টল এবং ফ্রিজার অ্যাপ প্রোটেকশন ("Not Responding" লজিক)
             // ===================================================================
             if (checkDangerZoneProtection(rootNode, packageName)) {
-                shouldBlockScreen = true;
-            } 
-            // ===================================================================
-            // লজিক ২: স্ক্রিন এবং ওয়েবসাইট স্ক্যানিং (হার্ডকোর কন্টেন্ট + কাস্টম কীওয়ার্ড)
-            // ===================================================================
-            else if (!isSettingsApp(packageName)) {
-                if (scanForHardcoreScreen(rootNode, prefs)) {
-                    shouldBlockScreen = true;
-                }
-            }
-
-            // ব্লক সিগন্যাল পেলে হোম স্ক্রিনে পাঠাবে এবং ফুল পপ-আপ দেখাবে
-            if (shouldBlockScreen) {
                 mainHandler.post(() -> {
-                    performGlobalAction(GLOBAL_ACTION_HOME);
-                    showSafetyOverlay();
+                    performGlobalAction(GLOBAL_ACTION_HOME); // হোম স্ক্রিনে পাঠানো
+                    showFakeCrashOverlay(); // "Not Responding" ফেক স্ক্রিন দেখানো
                 });
+                rootNode.recycle();
+                return;
+            } 
+            
+            // ===================================================================
+            // লজিক ২: স্ক্রিন এবং ওয়েবসাইট স্ক্যানিং
+            // ===================================================================
+            if (!isSettingsApp(packageName)) {
+                if (scanForHardcoreScreen(rootNode, prefs)) {
+                    mainHandler.post(() -> {
+                        performGlobalAction(GLOBAL_ACTION_HOME);
+                        showSafetyOverlay();
+                    });
+                }
             }
 
             rootNode.recycle();
@@ -260,7 +265,6 @@ public class FocusAccessibilityService extends AccessibilityService {
     // হেল্পার মেথডস (লজিক ইমপ্লিমেন্টেশন)
     // =========================================================================
 
-    // লজিক ৪: Shorts এবং Reels ডিটেক্টর
     private String detectShortsOrReels(AccessibilityNodeInfo node, String pkg) {
         if (node == null) return null;
 
@@ -293,7 +297,6 @@ public class FocusAccessibilityService extends AccessibilityService {
         return null;
     }
 
-    // লজিক ১: টাইপিং ক্লিয়ার করা (কাস্টম কীওয়ার্ড সহ)
     private void checkAndClearTyping(AccessibilityEvent event, SharedPreferences prefs) {
         AccessibilityNodeInfo source = event.getSource();
         if (source == null) return;
@@ -310,19 +313,16 @@ public class FocusAccessibilityService extends AccessibilityService {
         for (String word : words) {
             if (word.isEmpty()) continue;
 
-            // ১. হার্ডকোর লিস্ট চেক
             for (String k : hardcoreKeywords) {
                 if (word.equals(k.toLowerCase())) { matchFound = true; break; }
             }
             if (matchFound) break;
 
-            // ২. রোমান্টিক লিস্ট চেক
             for (String k : romanticKeywords) {
                 if (word.equals(k.toLowerCase())) { matchFound = true; break; }
             }
             if (matchFound) break;
 
-            // ৩. ইউজারের সেভ করা কাস্টম শব্দ চেক
             for (String k : customWords) {
                 if (word.equals(k.toLowerCase())) { matchFound = true; break; }
             }
@@ -342,7 +342,6 @@ public class FocusAccessibilityService extends AccessibilityService {
         source.recycle();
     }
 
-    // লজিক ২: স্ক্রিন স্ক্যান করার মেথড (কাস্টম কীওয়ার্ড সহ)
     private boolean scanForHardcoreScreen(AccessibilityNodeInfo node, SharedPreferences prefs) {
         if (node == null) return false;
 
@@ -360,7 +359,6 @@ public class FocusAccessibilityService extends AccessibilityService {
             if (content.contains(" " + k + " ")) return true;
         }
 
-        // ইউজারের সেভ করা কাস্টম শব্দ স্ক্রিনে আছে কিনা চেক
         Set<String> customWords = prefs.getStringSet("blocked_words", new HashSet<>());
         for (String k : customWords) {
             if (content.contains(" " + k.toLowerCase() + " ")) return true;
@@ -372,7 +370,6 @@ public class FocusAccessibilityService extends AccessibilityService {
         return false;
     }
 
-    // লজিক ৩: আনইনস্টল এবং ফ্রিজার প্রোটেকশন
     private boolean checkDangerZoneProtection(AccessibilityNodeInfo rootNode, String packageName) {
         String fullText = extractAllText(rootNode).toLowerCase();
 
@@ -467,49 +464,70 @@ public class FocusAccessibilityService extends AccessibilityService {
         }
     }
 
-    // সাধারণ ফুল স্ক্রিন ওভারলে (হাদিস সহ)
-    private void showSafetyOverlay() {
-        showSafetyOverlayCustom(quotes.get(random.nextInt(quotes.size())));
+    private void showFakeCrashOverlay() {
+        showSafetyOverlayCustom("System Process Not Responding\n\nPlease wait or close the app.", true);
     }
 
-    // কাস্টম মেসেজ সহ ফুল স্ক্রিন ওভারলে (টেক এ ব্রেক এর জন্য ব্যবহার হবে)
-    private void showSafetyOverlayCustom(String message) {
+    private void showSafetyOverlay() {
+        showSafetyOverlayCustom(quotes.get(random.nextInt(quotes.size())), false);
+    }
+
+    // isCrashScreen প্যারামিটার দিয়ে বোঝা যাবে এটি ফেক ক্র্যাশ নাকি সাধারণ হাদিস
+    private void showSafetyOverlayCustom(String message, boolean isCrashScreen) {
         if (isOverlayShowing) return;
         isOverlayShowing = true;
 
         mainHandler.post(() -> {
             windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
             LinearLayout layout = new LinearLayout(this);
-            layout.setBackgroundColor(Color.parseColor("#FB0F172A")); 
+            
+            // ফেক ক্র্যাশের জন্য ফুল ব্ল্যাক ব্যাকগ্রাউন্ড, সাধারণের জন্য ডার্ক ব্লু
+            if(isCrashScreen) {
+                layout.setBackgroundColor(Color.BLACK);
+            } else {
+                layout.setBackgroundColor(Color.parseColor("#FB0F172A")); 
+            }
+            
             layout.setOrientation(LinearLayout.VERTICAL);
             layout.setGravity(Gravity.CENTER);
             layout.setPadding(80, 80, 80, 80);
 
             TextView tv = new TextView(this);
             tv.setText(message);
-            tv.setTextColor(Color.WHITE);
-            tv.setTextSize(24);
+            
+            // ফেক ক্র্যাশের জন্য একটু ফেড টেক্সট (অরিজিনাল এন্ড্রয়েড ক্র্যাশ ডায়ালগের মতো)
+            if(isCrashScreen) {
+                tv.setTextColor(Color.LTGRAY);
+                tv.setTextSize(18);
+            } else {
+                tv.setTextColor(Color.WHITE);
+                tv.setTextSize(24);
+                tv.setLineSpacing(0, 1.5f);
+            }
+            
             tv.setGravity(Gravity.CENTER);
             tv.setTypeface(Typeface.DEFAULT_BOLD);
-            tv.setLineSpacing(0, 1.5f);
             layout.addView(tv);
 
-            Button closeButton = new Button(this);
-            closeButton.setText("Close / বন্ধ করুন");
-            closeButton.setTextColor(Color.WHITE);
-            closeButton.setBackgroundColor(Color.parseColor("#E53935")); 
-            closeButton.setPadding(40, 20, 40, 20);
-            
-            LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT, 
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            btnParams.setMargins(0, 80, 0, 0); 
-            closeButton.setLayoutParams(btnParams);
+            // ফেক ক্র্যাশের সময় কোনো ক্লোজ বাটন থাকবে না (ইউজার ফেঁসে যাবে)
+            if (!isCrashScreen) {
+                Button closeButton = new Button(this);
+                closeButton.setText("Close / বন্ধ করুন");
+                closeButton.setTextColor(Color.WHITE);
+                closeButton.setBackgroundColor(Color.parseColor("#E53935")); 
+                closeButton.setPadding(40, 20, 40, 20);
+                
+                LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, 
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                btnParams.setMargins(0, 80, 0, 0); 
+                closeButton.setLayoutParams(btnParams);
 
-            closeButton.setOnClickListener(v -> removeOverlay());
+                closeButton.setOnClickListener(v -> removeOverlay());
+                layout.addView(closeButton);
+            }
 
-            layout.addView(closeButton);
             overlayView = layout;
 
             WindowManager.LayoutParams params = new WindowManager.LayoutParams(
