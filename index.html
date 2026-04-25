@@ -3,218 +3,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RasFocus Pro - Premium Dashboard</title>
+    
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * 'self' https: wss:; img-src * 'self' data: https:;">
+
+    <title>Rasel Edu Tools | Professional Web Tools Suite</title>
+    
+    <meta name="title" content="Rasel Edu Tools | Professional Web Tools Suite by Rasel Mia">
+    <meta name="description" content="Rasel Edu Tools: A professional suite engineered by Rasel Mia (EEE, DUET). Access Diary, HTML Editor, Converters, Live Exam, and Global Chat all in one place.">
+    <meta name="keywords" content="Rasel Edu Tools, Web Tools, Rasel Mia, DUET EEE, Live Exam, HTML Editor, PDF Converter, Global Chat, Online Dashboard">
+    <meta name="author" content="Rasel Mia">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://raseledutools.github.io/">
+    <meta property="og:title" content="Rasel Edu Tools | Professional Workspace">
+    <meta property="og:description" content="A complete professional workspace by Rasel Mia (EEE, DUET). Seamlessly use tools like Live Exam, Code IDE, Diary, and Global Chat.">
+    <meta property="og:image" content="developer.jpg"> 
+    
+    <link rel="icon" href="favicon.ico?v=2" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="developer.jpg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
     <style>
-        :root {
-            --bg-main: #F4F7FB; --bg-card: #FFFFFF;
-            --text-dark: #0F172A; --text-gray: #64748B; --text-light: #94A3B8;
-            --primary: #4F46E5; --primary-light: #EEF2FF;
-            --accent-purple: #8B5CF6; --accent-purple-light: #F5F3FF;
-            --accent-blue: #3B82F6; --accent-blue-light: #EFF6FF;
-            --warning: #D97706; --warning-light: #FFFBEB;
-            --danger: #E11D48; --danger-light: #FFF1F2;
-            --success: #10B981;
-            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
-            --radius-lg: 28px;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        /* Updated Body to support Safe Area and full height */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #020617; 
+            color: #f8fafc; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+        
+        a { text-decoration: none; color: inherit; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+        
+        /* Native SVG Icons for Offline Support */
+        .svg-icon { width: 1em; height: 1em; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .svg-fill { fill: currentColor; stroke: none; }
+
+        /* === Top Right Product Button === */
+        .ras-product-btn {
+            position: fixed; top: calc(20px + env(safe-area-inset-top)); right: calc(20px + env(safe-area-inset-right)); z-index: 90;
+            background: linear-gradient(135deg, #ec4899, #6366f1);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50px; padding: 8px 18px;
+            display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 4px 15px rgba(236,72,153,0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ras-product-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 25px rgba(236,72,153,0.6); }
+        .ras-product-btn .icon { font-size: 22px; color: white; animation: floatIcon 2s infinite ease-in-out; }
+        .ras-product-btn .info { display: flex; flex-direction: column; }
+        .ras-product-btn .title { color: white; font-weight: 800; font-size: 15px; letter-spacing: 0.5px; }
+        .ras-product-btn .sub { color: rgba(255,255,255,0.9); font-size: 10px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;}
+        
+        @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+        @media (max-width: 600px) {
+            .ras-product-btn { top: calc(15px + env(safe-area-inset-top)); right: calc(15px + env(safe-area-inset-right)); padding: 6px 12px; }
+            .ras-product-btn .icon { font-size: 18px; }
+            .ras-product-btn .title { font-size: 13px; }
+            .ras-product-btn .sub { font-size: 8px; }
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        html, body { background-color: var(--bg-main); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 100vw; height: 100vh; overflow: hidden; }
+        /* === Menu Button === */
+        .menu-btn { position: fixed; top: calc(24px + env(safe-area-inset-top)); left: calc(24px + env(safe-area-inset-left)); z-index: 90; width: 48px; height: 48px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; color: white; font-size: 20px; backdrop-filter: blur(10px); transition: all 0.3s; display: flex; align-items: center; justify-content: center;}
+        .menu-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); color: #f472b6; }
 
-        .app-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; }
-
-        /* Notification Bar */
-        .persistent-notif { background: var(--success); color: white; font-size: 12px; font-weight: 700; text-align: center; padding: 6px 10px; display: flex; justify-content: center; align-items: center; gap: 8px; z-index: 100; }
-
-        .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 110px; scrollbar-width: none; }
-        .scroll-area::-webkit-scrollbar { display: none; }
-
-        .header { background: linear-gradient(135deg, #312E81 0%, #4F46E5 100%); padding: 40px 20px 35px; border-bottom-left-radius: 36px; border-bottom-right-radius: 36px; color: white; box-shadow: var(--shadow-md); }
-        .greeting { font-size: 13px; font-weight: 500; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; }
-        .title { font-size: 26px; font-weight: 800; margin-top: 4px; }
-
-        .content { padding: 0 18px; margin-top: -20px; position: relative; z-index: 5; }
-        .card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-md); margin-bottom: 16px; }
-
-        .section-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin: 24px 0 12px 6px; }
-
-        .list-card { padding: 8px 20px; }
-        .list-item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid #F1F5F9; }
-        .list-item:last-child { border-bottom: none; }
-        .item-content { flex: 1; margin-left: 15px;}
-        .item-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 3px;}
+        /* === Sidebar === */
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 95; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
         
-        .switch { width: 48px; height: 28px; background: #E2E8F0; border-radius: 30px; position: relative; cursor: pointer; transition: 0.3s; }
-        .switch.on { background: var(--success); }
-        .switch::after { content: ''; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .switch.on::after { transform: translateX(20px); }
+        .sidebar { position: fixed; top: 0; left: 0; height: 100%; width: 300px; background: rgba(15,23,42,0.95); backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.1); z-index: 100; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: 20px 0 50px rgba(0,0,0,0.5); overflow-y: auto;}
+        .sidebar.active { transform: translateX(0); }
+        
+        .sidebar-header { padding: calc(24px + env(safe-area-inset-top)) 24px 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: rgba(15,23,42,0.95); z-index: 2;}
+        .sidebar-header img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); }
+        .sidebar-header span { font-weight: 800; background: linear-gradient(to right, #fff, #fbcfe8); -webkit-background-clip: text; color: transparent; font-size: 18px; }
+        .close-btn { width: 32px; height: 32px; background: rgba(255,255,255,0.05); color: #94a3b8; border-radius: 50%; transition: 0.3s; display: flex; align-items: center; justify-content: center;}
+        .close-btn:hover { background: rgba(239,68,68,0.2); color: #f87171; }
 
-        /* Custom Keywords Section */
-        .custom-kw-section { margin-top: 15px; background: #F8FAFC; padding: 15px; border-radius: 16px; border: 1px solid #E2E8F0;}
-        .kw-input-group { display: flex; gap: 10px; margin-bottom: 15px;}
-        .kw-input { flex: 1; padding: 10px 15px; border: 1px solid #CBD5E1; border-radius: 12px; font-size: 14px; outline: none; }
-        .kw-btn { background: var(--primary); color: white; border: none; border-radius: 12px; padding: 0 20px; font-weight: 700; cursor: pointer; }
-        .kw-list { display: flex; flex-wrap: wrap; gap: 8px; }
-        .kw-tag { background: white; border: 1px solid #CBD5E1; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;}
-        .kw-del { color: var(--danger); cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1;}
+        .sidebar-nav { padding: 16px; flex-grow: 1; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+        .nav-label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 2px; padding: 0 16px; margin: 20px 0 10px; }
+        .nav-link { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-radius: 12px; color: #e2e8f0; transition: 0.2s; border: 1px solid transparent; margin-bottom: 5px;}
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: white; transform: translateX(5px); }
+        .nav-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+        /* === Main Content === */
+        .container { max-width: 1150px; margin: 0 auto; padding: 0 20px; }
+        
+        .hero-section { padding: 80px 20px 40px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .profile-img-container { position: relative; margin-bottom: 24px; cursor: pointer; }
+        .profile-img-container img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; z-index: 2; transition: 0.3s;}
+        .profile-img-container img:hover { transform: scale(1.05); box-shadow: 0 15px 35px rgba(236,72,153,0.5); }
+        
+        .status-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; backdrop-filter: blur(10px); }
+        .dot { width: 8px; height: 8px; background: #ec4899; border-radius: 50%; position: relative; }
+        .dot::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; background: rgba(236,72,153,0.5); animation: ping 1.5s infinite; }
+        @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+
+        .main-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; background: linear-gradient(to right, #fff, #fce7f3, #e9d5ff); -webkit-background-clip: text; color: transparent; margin-bottom: 20px; line-height: 1.2; }
+
+        /* === Ticker === */
+        .ticker-wrap { max-width: 768px; width: 100%; background: rgba(15,23,42,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; display: flex; align-items: center; height: 48px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+        .ticker-label { background: linear-gradient(to right, #db2777, #9333ea); padding: 0 20px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; z-index: 2; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        .ticker-content { flex-grow: 1; overflow: hidden; position: relative; height: 100%; display: flex; align-items: center; }
+        .ticker-text { white-space: nowrap; font-size: 14px; font-weight: 500; animation: scroll 25s linear infinite; }
+        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+        /* === Action Buttons === */
+        .action-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-bottom: 40px; }
+        .btn-action { display: inline-flex; align-items: center; gap: 12px; padding: 12px 24px; border-radius: 50px; font-weight: 700; color: white; transition: 0.3s; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-action:hover { transform: translateY(-3px); }
+        .btn-notice { background: linear-gradient(to right, #c026d3, #e11d48); box-shadow: 0 8px 20px rgba(217,70,239,0.4); }
+        .btn-exam { background: linear-gradient(to right, #059669, #0891b2); box-shadow: 0 8px 20px rgba(16,185,129,0.4); text-align: left; }
+        .btn-chat { background: linear-gradient(to right, #2563eb, #4f46e5); box-shadow: 0 8px 20px rgba(37,99,235,0.3); }
+
+        /* === Tools Grid === */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; padding-bottom: 60px; }
+        .card { border-radius: 20px; padding: 24px; text-decoration: none; color: white; position: relative; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.3); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; font-size: 20px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
+        .card:hover .card-icon { transform: scale(1.1) rotate(-5deg); background: rgba(255,255,255,0.2); }
+        .card-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; background: rgba(0,0,0,0.2); padding: 4px 12px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); }
+        .card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .card p { font-size: 14px; opacity: 0.8; line-height: 1.6; }
+
+        /* Card Colors */
+        .c-purple { background: linear-gradient(135deg, rgba(147,51,234,0.8), rgba(219,39,119,0.8)); }
+        .c-blue { background: linear-gradient(135deg, rgba(37,99,235,0.8), rgba(8,145,178,0.8)); }
+        .c-essential { background: linear-gradient(135deg, rgba(79,70,229,0.9), rgba(236,72,153,0.7)); }
+        .c-orange { background: linear-gradient(135deg, rgba(234,88,12,0.8), rgba(220,38,38,0.8)); }
+        .c-emerald { background: linear-gradient(135deg, rgba(5,150,105,0.8), rgba(13,148,136,0.8)); }
+        .c-rose { background: linear-gradient(135deg, rgba(225,29,72,0.8), rgba(236,72,153,0.8)); }
+        .c-audio { background: linear-gradient(135deg, rgba(79,70,229,0.9), rgba(124,58,237,0.9)); }
+        .c-amber { background: linear-gradient(135deg, rgba(217,119,6,0.8), rgba(249,115,22,0.8)); }
+        .c-fuchsia { background: linear-gradient(135deg, rgba(192,38,211,0.8), rgba(147,51,234,0.8)); }
+
+        /* === Footer === */
+        footer { border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); padding: 24px 0; backdrop-filter: blur(10px); }
+        .footer-content { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; }
+        .admin-trigger { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 4px 12px 4px 4px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
+        .admin-trigger:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
+        .admin-trigger img { width: 24px; height: 24px; border-radius: 50%; }
+
+        /* === Admin Modal === */
+        .admin-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .admin-modal.active { opacity: 1; visibility: visible; }
+        .modal-box { background: #0f172a; padding: 32px; border-radius: 24px; width: 90%; max-width: 380px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 0 40px rgba(236,72,153,0.15); text-align: center; position: relative; overflow: hidden; transform: scale(0.9); transition: 0.3s; }
+        .admin-modal.active .modal-box { transform: scale(1); }
+        .pass-error-line { position: absolute; top: 0; left: 0; height: 6px; background: #ef4444; width: 0; transition: 0.3s; }
+        .modal-input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; text-align: center; color: white; font-weight: bold; letter-spacing: 4px; margin: 20px 0; outline: none; transition: 0.3s;}
+        .modal-input:focus { border-color: #ec4899; }
+        .modal-btns { display: flex; gap: 12px; }
+        .btn-login { flex-grow: 1; background: linear-gradient(to right, #db2777, #9333ea); color: white; padding: 14px; border-radius: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-cancel { padding: 14px 20px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        
-        <div class="persistent-notif">
-            ⏱️ Active Time: <span id="liveRunTime">0h 0m</span> | Blocked: <span id="liveBlockCount">0</span>
-        </div>
 
-        <div class="scroll-area">
-            <div class="header">
-                <div class="greeting">Welcome Back</div>
-                <div class="title">RasFocus Pro</div>
+    <a href="product.html" class="ras-product-btn">
+        <svg class="svg-icon icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        <div class="info">
+            <span class="title">RasProduct</span>
+            <span class="sub">Apps & PC Software</span>
+        </div>
+    </a>
+
+    <button class="menu-btn" onclick="toggleSidebar()">
+        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="developer.jpg" alt="Developer" onerror="this.src='https://ui-avatars.com/api/?name=Rasel+Mia&background=db2777&color=fff'">
+                <span>Web Tools</span>
+            </div>
+            <button class="close-btn" onclick="toggleSidebar()"><svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-label">Main Navigation</div>
+            <a href="notice.html" class="nav-link"><div class="nav-icon" style="background: rgba(217,70,239,0.1); color: #d946ef;"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div> Notice Board</a>
+            <a href="exam.html" class="nav-link"><div class="nav-icon" style="background: rgba(16,185,129,0.1); color: #10b981;"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div> Live Exam Center</a>
+            
+            <div class="nav-label">Professional Tools</div>
+            <a href="diary.html" class="nav-link"><div class="nav-icon" style="background: rgba(168,85,247,0.1); color: #a855f7;"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></div> Professional Diary</a>
+            <a href="docx view.html" class="nav-link"><div class="nav-icon" style="background: rgba(59,130,246,0.1); color: #3b82f6;"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div> RasBook</a>
+            <a href="html preview.html" class="nav-link"><div class="nav-icon" style="background: rgba(249,115,22,0.1); color: #f97316;"><svg class="svg-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></div> Code Workspace</a>
+            <a href="my converter.html" class="nav-link"><div class="nav-icon" style="background: rgba(20,184,166,0.1); color: #14b8a6;"><svg class="svg-icon" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></div> Universal Converter</a>
+            <a href="photo viewer.html" class="nav-link"><div class="nav-icon" style="background: rgba(244,63,94,0.1); color: #f43f5e;"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div> Media Gallery</a>
+            <a href="Romadan plan full book.html" class="nav-link"><div class="nav-icon" style="background: rgba(245,158,11,0.1); color: #f59e0b;"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div> Ramadan Plan Book</a>
+            <a href="chat.html" class="nav-link"><div class="nav-icon" style="background: rgba(217,70,239,0.1); color: #d946ef;"><svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div> Global Chat</a>
+
+            <div class="nav-label">More Links</div>
+            <a href="about.html" class="nav-link"><div class="nav-icon" style="background: rgba(99,102,241,0.1); color: #6366f1;"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div> About Us</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="hero-section">
+            
+            <div class="profile-img-container" onclick="openAdminLogin()" title="Admin Login">
+                <img src="developer.jpg" alt="Developer Rasel" onerror="this.src='https://ui-avatars.com/api/?name=Rasel+Mia&background=db2777&color=fff'">
+            </div>
+            
+            <div class="status-badge"><div class="dot"></div> System Online</div>
+            <h1 class="main-title">Rasel Edu Tools</h1>
+
+            <div class="ticker-wrap">
+                <div class="ticker-label">UPDATE</div>
+                <div class="ticker-content">
+                    <div id="ticker-text" class="ticker-text">Connecting to server...</div>
+                </div>
             </div>
 
-            <div class="content">
-                <div class="section-title">Protection Controls</div>
-                <div class="card list-card">
-                    
-                    <div class="list-item">
-                        <div class="item-content">
-                            <div class="item-title">Block Keywords</div>
-                            <div style="font-size:12px; color:gray;">Block bad words in search/chat</div>
-                        </div>
-                        <div class="switch" id="blockKeywords"></div>
+            <div class="action-buttons">
+                <a href="notice.html" class="btn-action btn-notice"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> View Notice Board</a>
+                <a href="exam.html" class="btn-action btn-exam">
+                    <svg class="svg-icon" style="font-size: 24px;" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                        <span style="font-size: 13px; text-transform: uppercase;">Today's Live Exam</span>
+                        <span id="live-exam-date" style="font-size: 10px; opacity: 0.8; font-style: italic;">Loading...</span>
                     </div>
+                </a>
+                <a href="chat_indivisual.html" class="btn-action btn-chat"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Join RasGram</a>
+                <a href="psc.html" class="btn-action btn-chat" style="background: linear-gradient(to right, #4f46e5, #7c3aed);"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> PSC Solutions</a>
+            </div>
+        </header>
 
-                    <div class="custom-kw-section" id="customKwSection" style="display: none;">
-                        <div class="kw-input-group">
-                            <input type="text" id="kwInput" class="kw-input" placeholder="Type word (e.g. game)">
-                            <button id="kwAddBtn" class="kw-btn">Add</button>
-                        </div>
-                        <div class="kw-list" id="kwList"></div>
-                    </div>
-                    
-                    <div class="list-item">
-                        <div class="item-content">
-                            <div class="item-title">Block 18+ Content</div>
-                        </div>
-                        <div class="switch" id="blockAdult"></div>
-                    </div>
+        <div class="grid">
+            <a href="diary.html" class="card c-purple">
+                <div class="card-header"><div class="card-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></div><span class="card-tag">Personal</span></div>
+                <h3>Professional Diary</h3>
+                <p>Encrypted daily journal. Track tasks, log thoughts, and preserve records securely.</p>
+            </a>
 
-                    <div class="list-item">
-                        <div class="item-content">
-                            <div class="item-title">Block Reels/Shorts</div>
-                        </div>
-                        <div class="switch" id="blockShorts"></div>
-                    </div>
-                </div>
+            <a href="docx view.html" class="card c-blue">
+                <div class="card-header"><div class="card-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div><span class="card-tag">Document</span></div>
+                <h3>RasBook</h3>
+                <p>A professional social media like facebook. Fast and secure.</p>
+            </a>
+
+            <a href="link.html" class="card c-essential">
+                <div class="card-header"><div class="card-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></div><span class="card-tag">Document</span></div>
+                <h3>Essential tools</h3>
+                <p>Essential educative tools for students</p>
+            </a>
+
+            <a href="html preview.html" class="card c-orange">
+                <div class="card-header"><div class="card-icon"><svg class="svg-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></div><span class="card-tag">Developer</span></div>
+                <h3>Code Workspace</h3>
+                <p>Live IDE environment. Write, debug, and execute HTML/CSS/JS components.</p>
+            </a>
+
+            <a href="my converter.html" class="card c-emerald">
+                <div class="card-header"><div class="card-icon"><svg class="svg-icon" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg></div><span class="card-tag">Utility</span></div>
+                <h3>Universal Converter</h3>
+                <p>Precision tools for format conversion, unit calculation, and data parsing.</p>
+            </a>
+
+            <a href="photo viewer.html" class="card c-rose">
+                <div class="card-header"><div class="card-icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div><span class="card-tag">Media</span></div>
+                <h3>Media Gallery</h3>
+                <p>High-performance image viewer. Organize and inspect your visual assets.</p>
+            </a>
+
+            <a href="sound generator.html" class="card c-audio">
+                <div class="card-header"><div class="card-icon"><svg class="svg-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div><span class="card-tag">Audio</span></div>
+                <h3>Focus Noise & Sleep</h3>
+                <p>Advanced frequency generation and sound wave manipulation engine.</p>
+            </a>
+
+            <a href="Romadan plan full book.html" class="card c-amber">
+                <div class="card-header"><div class="card-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div><span class="card-tag">Lifestyle</span></div>
+                <h3>Ramadan Plan Book</h3>
+                <p>Complete interactive guide and daily planner for a productive Ramadan.</p>
+            </a>
+
+            <a href="chat.html" class="card c-fuchsia">
+                <div class="card-header"><div class="card-icon"><svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><span class="card-tag">Updates</span></div>
+                <h3>Connect Globally</h3>
+                <p>You can give any suggestion or view admin broadcast messages.</p>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container footer-content">
+            <div style="font-size: 14px; color: #cbd5e1;">&copy; Rasel Edu Tools</div>
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Engineered by</span>
+                <button onclick="openAdminLogin()" class="admin-trigger">
+                    <img src="my_image.jpg" alt="Developer" onerror="this.style.display='none'">
+                    <span style="font-size: 12px; font-weight: bold; color: white;">Rasel Mia</span>
+                </button>
+            </div>
+
+            <a href="tel:01566054963" style="font-size: 14px; font-weight: bold; color: #cbd5e1;"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> 01566054963</a>
+        </div>
+    </footer>
+
+    <div class="admin-modal" id="adminModal">
+        <div class="modal-box">
+            <div class="pass-error-line" id="passErrorLine"></div>
+            <div style="width: 64px; height: 64px; background: rgba(236,72,153,0.1); border: 1px solid rgba(236,72,153,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px; color: #ec4899;">
+                <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h3 style="font-size: 24px; font-weight: 900; margin-bottom: 8px;">Admin Access</h3>
+            <p style="font-size: 12px; color: #94a3b8;">Restricted area. Verification required.</p>
+            
+            <input type="password" id="adminPass" class="modal-input" placeholder="••••••••">
+            
+            <div class="modal-btns">
+                <button onclick="verifyAdmin()" class="btn-login">Login</button>
+                <button onclick="closeAdmin()" class="btn-cancel">Cancel</button>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { registerPlugin } from '@capacitor/core';
-        const AppBlocker = registerPlugin('AppBlocker');
+    <script>
+        // Set Live Date
+        const dateElement = document.getElementById('live-exam-date');
+        if (dateElement) {
+            const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+            dateElement.innerText = new Date().toLocaleDateString('en-US', options);
+        }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // Sidebar Logic
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
 
-            // --- 1. Notification Time & Count ---
-            let startTime = localStorage.getItem('appStartTime');
-            if (!startTime) {
-                startTime = Date.now();
-                localStorage.setItem('appStartTime', startTime);
+        // Admin Modal Logic
+        const SECRET_PASSWORD = "    ";
+
+        function openAdminLogin() {
+            document.getElementById('adminModal').classList.add('active');
+            setTimeout(() => document.getElementById('adminPass').focus(), 100);
+        }
+
+        function closeAdmin() {
+            document.getElementById('adminModal').classList.remove('active');
+            document.getElementById('adminPass').value = '';
+            document.getElementById('passErrorLine').style.width = '0';
+        }
+
+        function verifyAdmin() {
+            if (document.getElementById('adminPass').value === SECRET_PASSWORD) {
+                sessionStorage.setItem('admin_logged_in', 'true');
+                window.location.href = 'remot.html'; // Goes to remot.html
+            } else {
+                document.getElementById('passErrorLine').style.width = '100%';
+                document.getElementById('adminPass').value = '';
+                setTimeout(() => document.getElementById('passErrorLine').style.width = '0', 1500);
             }
+        }
 
-            setInterval(() => {
-                let diff = Date.now() - parseInt(startTime);
-                let hours = Math.floor(diff / (1000 * 60 * 60));
-                let mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                document.getElementById('liveRunTime').innerText = `${hours}h ${mins}m`;
-            }, 60000); 
-            // Call immediately once
-            let diff = Date.now() - parseInt(startTime);
-            document.getElementById('liveRunTime').innerText = `${Math.floor(diff / 3600000)}h ${Math.floor((diff % 3600000) / 60000)}m`;
-
-            // --- 2. Custom Keywords Logic ---
-            const kwInput = document.getElementById('kwInput');
-            const kwAddBtn = document.getElementById('kwAddBtn');
-            const kwListDiv = document.getElementById('kwList');
-            const customKwSection = document.getElementById('customKwSection');
-            
-            let customKeywords = JSON.parse(localStorage.getItem('customKeywords') || '[]');
-
-            function renderKeywords() {
-                kwListDiv.innerHTML = '';
-                customKeywords.forEach((kw, index) => {
-                    const tag = document.createElement('div');
-                    tag.className = 'kw-tag';
-                    tag.innerHTML = `${kw} <span class="kw-del" data-index="${index}">&times;</span>`;
-                    kwListDiv.appendChild(tag);
-                });
-                sendSettingsToJava();
-            }
-
-            kwAddBtn.addEventListener('click', () => {
-                const word = kwInput.value.trim().toLowerCase();
-                if (word && !customKeywords.includes(word)) {
-                    customKeywords.push(word);
-                    localStorage.setItem('customKeywords', JSON.stringify(customKeywords));
-                    kwInput.value = '';
-                    renderKeywords();
-                }
-            });
-
-            kwListDiv.addEventListener('click', (e) => {
-                if (e.target.classList.contains('kw-del')) {
-                    const idx = e.target.getAttribute('data-index');
-                    customKeywords.splice(idx, 1);
-                    localStorage.setItem('customKeywords', JSON.stringify(customKeywords));
-                    renderKeywords();
-                }
-            });
-
-            // Initial Render
-            renderKeywords();
-
-            // --- 3. Toggles Logic ---
-            const toggles = {
-                blockKeywords: { el: document.getElementById('blockKeywords') },
-                blockAdult: { el: document.getElementById('blockAdult') },
-                blockShorts: { el: document.getElementById('blockShorts') }
-            };
-
-            for (const key in toggles) {
-                if (localStorage.getItem(key) === 'true') {
-                    toggles[key].el.classList.add('on');
-                    if(key === 'blockKeywords') customKwSection.style.display = 'block';
-                }
-                
-                toggles[key].el.addEventListener('click', async function() {
-                    this.classList.toggle('on');
-                    const isOn = this.classList.contains('on');
-                    localStorage.setItem(key, isOn);
-                    
-                    if(key === 'blockKeywords') {
-                        customKwSection.style.display = isOn ? 'block' : 'none';
-                    }
-                    
-                    sendSettingsToJava();
-                });
-            }
-
-            // --- 4. Send Data to Java Native ---
-            async function sendSettingsToJava() {
-                const currentSettings = {
-                    blockKeywords: document.getElementById('blockKeywords').classList.contains('on'),
-                    adultContent: document.getElementById('blockAdult').classList.contains('on'),
-                    blockReelsShorts: document.getElementById('blockShorts').classList.contains('on'),
-                    customKeywordsList: JSON.stringify(customKeywords) // কাস্টম শব্দগুলো জাভাতে পাঠানো হচ্ছে
-                };
-
-                console.log("Sending to Java: ", currentSettings);
-                try {
-                    await AppBlocker.updateSettings(currentSettings);
-                } catch (e) { console.log("Plugin not loaded"); }
-            }
+        document.getElementById('adminPass').addEventListener('keypress', function(e) { 
+            if (e.key === 'Enter') verifyAdmin(); 
         });
     </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53"
+        };
+        
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+
+            signInAnonymously(auth).catch(err => console.error("Auth Error", err));
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    onSnapshot(doc(db, 'artifacts', 'rasel-mia-universal-sync', 'public', 'data', 'broadcast', 'current'), (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            const tickerText = document.getElementById('ticker-text');
+                            if(data.message) tickerText.innerHTML = `${data.message} &nbsp;&bull;&nbsp; Global Active.`;
+                            else if(data.text) tickerText.innerHTML = `${data.text} &nbsp;&bull;&nbsp; Global Active.`;
+                        }
+                    });
+                }
+            });
+        } catch (e) {
+            console.error("Firebase load error", e);
+        }
+    </script>
+
+    <script type="module" src="./src/tracker.js"></script>
 </body>
 </html>
