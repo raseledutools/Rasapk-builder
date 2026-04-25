@@ -5,9 +5,13 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,89 +21,228 @@ import java.util.Set;
 public class ControlActivity extends Activity {
 
     private SharedPreferences prefs;
-    private EditText keywordInput, breakTimeInput;
-    private LinearLayout keywordListContainer;
+
+    // Sidebar Menus
+    private TextView menuBlocks, menuAdultBlock;
+    // Main Views
+    private ScrollView viewBlocks, viewAdultBlock, viewStrictProtocols;
+    // Sub Tabs inside Adult Block
+    private TextView tabSafeBrowsing1, tabStrictProtocols1;
+    private TextView tabSafeBrowsing2, tabStrictProtocols2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // ডায়ালগ স্টাইল এবং ডার্ক থিম নিশ্চিত করা
-        setContentView(R.layout.activity_control);
-        getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        getWindow().getDecorView().setBackgroundColor(Color.TRANSPARENT);
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.parseColor("#0DA4A6")); 
 
+        setContentView(R.layout.activity_control);
         prefs = getSharedPreferences("RasFocusPrefs", MODE_PRIVATE);
 
-        keywordInput = findViewById(R.id.keywordInput);
-        breakTimeInput = findViewById(R.id.breakTimeInput);
-        keywordListContainer = findViewById(R.id.keywordListContainer);
+        // Init Sidebar and Views
+        menuBlocks = findViewById(R.id.menuBlocks);
+        menuAdultBlock = findViewById(R.id.menuAdultBlock);
+        viewBlocks = findViewById(R.id.viewBlocks);
+        viewAdultBlock = findViewById(R.id.viewAdultBlock);
+        viewStrictProtocols = findViewById(R.id.viewStrictProtocols);
 
-        // ১. Focus / Take a Break Button
-        Button btnStartFocus = findViewById(R.id.btnStartFocus);
-        btnStartFocus.setOnClickListener(v -> {
+        // Init Sub Tabs
+        tabSafeBrowsing1 = findViewById(R.id.tabSafeBrowsing1);
+        tabStrictProtocols1 = findViewById(R.id.tabStrictProtocols1);
+        tabSafeBrowsing2 = findViewById(R.id.tabSafeBrowsing2);
+        tabStrictProtocols2 = findViewById(R.id.tabStrictProtocols2);
+
+        // Sidebar Click Listeners
+        menuBlocks.setOnClickListener(v -> switchTab("blocks"));
+        menuAdultBlock.setOnClickListener(v -> switchTab("adult"));
+
+        // Sub Tab Click Listeners
+        tabStrictProtocols1.setOnClickListener(v -> switchSubTab("strict"));
+        tabSafeBrowsing2.setOnClickListener(v -> switchSubTab("safe"));
+
+        // Close Button
+        findViewById(R.id.btnClose).setOnClickListener(v -> finish());
+
+        // Setup Functions
+        setupBlocksTab();
+        setupAdultBlockTab();
+        setupStrictProtocolsTab();
+
+        // Default Tab
+        switchTab("blocks");
+    }
+
+    private void switchTab(String tab) {
+        if (tab.equals("blocks")) {
+            menuBlocks.setBackgroundColor(Color.WHITE);
+            menuBlocks.setTextColor(Color.parseColor("#0DA4A6"));
+            menuBlocks.setTypeface(null, android.graphics.Typeface.BOLD);
+
+            menuAdultBlock.setBackgroundColor(Color.parseColor("#0DA4A6"));
+            menuAdultBlock.setTextColor(Color.WHITE);
+            menuAdultBlock.setTypeface(null, android.graphics.Typeface.NORMAL);
+
+            viewBlocks.setVisibility(View.VISIBLE);
+            viewAdultBlock.setVisibility(View.GONE);
+            viewStrictProtocols.setVisibility(View.GONE);
+
+        } else if (tab.equals("adult")) {
+            menuAdultBlock.setBackgroundColor(Color.WHITE);
+            menuAdultBlock.setTextColor(Color.parseColor("#0DA4A6"));
+            menuAdultBlock.setTypeface(null, android.graphics.Typeface.BOLD);
+
+            menuBlocks.setBackgroundColor(Color.parseColor("#0DA4A6"));
+            menuBlocks.setTextColor(Color.WHITE);
+            menuBlocks.setTypeface(null, android.graphics.Typeface.NORMAL);
+
+            // Default to Safe Browsing sub-tab when entering Adult Block
+            switchSubTab("safe");
+        }
+    }
+
+    private void switchSubTab(String subTab) {
+        if (subTab.equals("safe")) {
+            viewBlocks.setVisibility(View.GONE);
+            viewAdultBlock.setVisibility(View.VISIBLE);
+            viewStrictProtocols.setVisibility(View.GONE);
+        } else if (subTab.equals("strict")) {
+            viewBlocks.setVisibility(View.GONE);
+            viewAdultBlock.setVisibility(View.GONE);
+            viewStrictProtocols.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setupBlocksTab() {
+        EditText breakTimeInput = findViewById(R.id.breakTimeInputBlocks);
+        findViewById(R.id.btnStartFocusBlocks).setOnClickListener(v -> {
             String timeStr = breakTimeInput.getText().toString().trim();
             if (!timeStr.isEmpty()) {
                 long minutes = Long.parseLong(timeStr);
-                long breakEndTime = System.currentTimeMillis() + (minutes * 60 * 1000);
-                
-                prefs.edit().putLong("break_until", breakEndTime).apply();
-                Toast.makeText(this, "Focus Mode Started for " + minutes + " minutes!", Toast.LENGTH_LONG).show();
-                finish(); // প্যানেল ক্লোজ করে দিবে
-            } else {
-                Toast.makeText(this, "Please enter break minutes", Toast.LENGTH_SHORT).show();
+                prefs.edit().putLong("break_until", System.currentTimeMillis() + (minutes * 60 * 1000)).apply();
+                Toast.makeText(this, "Focus Mode Started!", Toast.LENGTH_SHORT).show();
+                finish(); 
             }
         });
 
-        // ২. Add Custom Keyword Button
-        Button btnAddKeyword = findViewById(R.id.btnAddKeyword);
-        btnAddKeyword.setOnClickListener(v -> {
-            String word = keywordInput.getText().toString().trim().toLowerCase();
-            if (!word.isEmpty()) {
-                Set<String> words = new HashSet<>(prefs.getStringSet("blocked_words", new HashSet<>()));
-                words.add(word);
-                prefs.edit().putStringSet("blocked_words", words).apply();
-                
-                keywordInput.setText("");
-                updateKeywordUI();
-                Toast.makeText(this, "Keyword Added!", Toast.LENGTH_SHORT).show();
-            }
+        // Setup generic list logic
+        EditText websiteInput = findViewById(R.id.websiteInput);
+        LinearLayout websiteListContainer = findViewById(R.id.websiteListContainer);
+        findViewById(R.id.btnAddWebsite).setOnClickListener(v -> {
+            addStringToList("blocked_words", websiteInput.getText().toString());
+            websiteInput.setText("");
+            refreshListUI("blocked_words", websiteListContainer);
         });
-
-        // ৩. Clear All Keywords Button
-        Button btnClearKeywords = findViewById(R.id.btnClearKeywords);
-        btnClearKeywords.setOnClickListener(v -> {
-            prefs.edit().remove("blocked_words").apply();
-            updateKeywordUI();
-            Toast.makeText(this, "All custom keywords cleared!", Toast.LENGTH_SHORT).show();
-        });
-
-        // ৪. Close Button
-        findViewById(R.id.btnClose).setOnClickListener(v -> finish());
-
-        // UI তে বর্তমান শব্দগুলো দেখাও
-        updateKeywordUI();
+        refreshListUI("blocked_words", websiteListContainer);
     }
 
-    private void updateKeywordUI() {
-        keywordListContainer.removeAllViews();
-        Set<String> words = prefs.getStringSet("blocked_words", new HashSet<>());
-        
-        if(words.isEmpty()){
-            TextView tv = new TextView(this);
-            tv.setText("No custom keywords added.");
-            tv.setTextColor(Color.LTGRAY);
-            keywordListContainer.addView(tv);
-            return;
-        }
+    private void setupAdultBlockTab() {
+        findViewById(R.id.btnStartFocusAdult).setOnClickListener(v -> {
+            Toast.makeText(this, "Adult Focus Active!", Toast.LENGTH_SHORT).show();
+        });
 
-        for (String w : words) {
+        EditText keywordInputAdult = findViewById(R.id.keywordInputAdult);
+        LinearLayout keywordListContainerAdult = findViewById(R.id.keywordListContainerAdult);
+        findViewById(R.id.btnAddKeywordAdult).setOnClickListener(v -> {
+            addStringToList("blocked_words", keywordInputAdult.getText().toString());
+            keywordInputAdult.setText("");
+            refreshListUI("blocked_words", keywordListContainerAdult);
+            refreshListUI("blocked_words", findViewById(R.id.websiteListContainer));
+        });
+        refreshListUI("blocked_words", keywordListContainerAdult);
+
+        // Checkboxes
+        CheckBox chkAdult = findViewById(R.id.chkAdult);
+        CheckBox chkHardcore = findViewById(R.id.chkHardcore);
+        CheckBox chkRomantic = findViewById(R.id.chkRomantic);
+        CheckBox chkReels = findViewById(R.id.chkReels);
+        CheckBox chkShorts = findViewById(R.id.chkShorts);
+
+        chkAdult.setChecked(prefs.getBoolean("chkAdult", true));
+        chkHardcore.setChecked(prefs.getBoolean("chkHardcore", true));
+        chkRomantic.setChecked(prefs.getBoolean("chkRomantic", true));
+        chkReels.setChecked(prefs.getBoolean("chkReels", true));
+        chkShorts.setChecked(prefs.getBoolean("chkShorts", true));
+
+        View.OnClickListener chkListener = v -> {
+            prefs.edit()
+                .putBoolean("chkAdult", chkAdult.isChecked())
+                .putBoolean("chkHardcore", chkHardcore.isChecked())
+                .putBoolean("chkRomantic", chkRomantic.isChecked())
+                .putBoolean("chkReels", chkReels.isChecked())
+                .putBoolean("chkShorts", chkShorts.isChecked())
+                .apply();
+        };
+
+        chkAdult.setOnClickListener(chkListener);
+        chkHardcore.setOnClickListener(chkListener);
+        chkRomantic.setOnClickListener(chkListener);
+        chkReels.setOnClickListener(chkListener);
+        chkShorts.setOnClickListener(chkListener);
+    }
+
+    private void setupStrictProtocolsTab() {
+        findViewById(R.id.btnStartFocusStrict).setOnClickListener(v -> {
+            Toast.makeText(this, "Strict Focus Active!", Toast.LENGTH_SHORT).show();
+        });
+
+        // 15 Min Panic Lockdown
+        findViewById(R.id.btnPanicLockdown).setOnClickListener(v -> {
+            long breakEndTime = System.currentTimeMillis() + (15 * 60 * 1000);
+            prefs.edit().putLong("break_until", breakEndTime).apply();
+            Toast.makeText(this, "PANIC LOCKDOWN INITIATED FOR 15 MINS!", Toast.LENGTH_LONG).show();
+            finish(); 
+        });
+
+        // Checkboxes
+        CheckBox chkUrlTracking = findViewById(R.id.chkUrlTracking);
+        CheckBox chkSafeSearch = findViewById(R.id.chkSafeSearch);
+        CheckBox chkStrictMode = findViewById(R.id.chkStrictMode);
+        CheckBox chkDnsBlock = findViewById(R.id.chkDnsBlock);
+        CheckBox chkIncognito = findViewById(R.id.chkIncognito);
+
+        chkUrlTracking.setChecked(prefs.getBoolean("chkUrlTracking", true));
+        chkSafeSearch.setChecked(prefs.getBoolean("chkSafeSearch", true));
+        chkStrictMode.setChecked(prefs.getBoolean("chkStrictMode", false));
+        chkDnsBlock.setChecked(prefs.getBoolean("chkDnsBlock", false));
+        chkIncognito.setChecked(prefs.getBoolean("chkIncognito", false));
+
+        View.OnClickListener chkListener = v -> {
+            prefs.edit()
+                .putBoolean("chkUrlTracking", chkUrlTracking.isChecked())
+                .putBoolean("chkSafeSearch", chkSafeSearch.isChecked())
+                .putBoolean("chkStrictMode", chkStrictMode.isChecked())
+                .putBoolean("chkDnsBlock", chkDnsBlock.isChecked())
+                .putBoolean("chkIncognito", chkIncognito.isChecked())
+                .apply();
+        };
+
+        chkUrlTracking.setOnClickListener(chkListener);
+        chkSafeSearch.setOnClickListener(chkListener);
+        chkStrictMode.setOnClickListener(chkListener);
+        chkDnsBlock.setOnClickListener(chkListener);
+        chkIncognito.setOnClickListener(chkListener);
+    }
+
+    // Helpers
+    private void addStringToList(String key, String value) {
+        if (value.trim().isEmpty()) return;
+        Set<String> set = new HashSet<>(prefs.getStringSet(key, new HashSet<>()));
+        set.add(value.trim().toLowerCase());
+        prefs.edit().putStringSet(key, set).apply();
+    }
+
+    private void refreshListUI(String key, LinearLayout container) {
+        container.removeAllViews();
+        Set<String> items = prefs.getStringSet(key, new HashSet<>());
+        for (String item : items) {
             TextView tv = new TextView(this);
-            tv.setText("🚫 " + w);
-            tv.setTextColor(Color.WHITE);
-            tv.setTextSize(16);
-            tv.setPadding(0, 8, 0, 8);
-            keywordListContainer.addView(tv);
+            tv.setText("• " + item);
+            tv.setTextColor(Color.parseColor("#333333"));
+            tv.setTextSize(14);
+            tv.setPadding(0, 5, 0, 5);
+            container.addView(tv);
         }
     }
 }
