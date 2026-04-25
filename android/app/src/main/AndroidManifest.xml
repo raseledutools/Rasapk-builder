@@ -72,7 +72,7 @@
 
         <activity 
             android:name=".ControlActivity"
-            android:theme="@android:style/Theme.Dialog"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:excludeFromRecents="true"
             android:exported="true" />
 
