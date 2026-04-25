@@ -15,6 +15,9 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,17 +32,36 @@ public class ControlActivity extends Activity {
     // Sub Tabs inside Adult Block
     private TextView tabSafeBrowsing1, tabStrictProtocols1;
     private TextView tabSafeBrowsing2, tabStrictProtocols2;
+    
+    // Drawer Layout
+    private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // ================= আসল ফুল-স্ক্রিন মোড (Immersive) =================
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION 
+                      | View.SYSTEM_UI_FLAG_FULLSCREEN 
+                      | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        decorView.setSystemUiVisibility(uiOptions);
+        // =================================================================
+
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.parseColor("#0DA4A6")); 
 
         setContentView(R.layout.activity_control);
         prefs = getSharedPreferences("RasFocusPrefs", MODE_PRIVATE);
+
+        // ================= ড্রয়ার লজিক (Hamburger Menu) =================
+        drawerLayout = findViewById(R.id.drawerLayout);
+        Button btnMenu = findViewById(R.id.btnMenu);
+        
+        btnMenu.setOnClickListener(v -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
 
         // Init Sidebar and Views
         menuBlocks = findViewById(R.id.menuBlocks);
@@ -54,9 +76,15 @@ public class ControlActivity extends Activity {
         tabSafeBrowsing2 = findViewById(R.id.tabSafeBrowsing2);
         tabStrictProtocols2 = findViewById(R.id.tabStrictProtocols2);
 
-        // Sidebar Click Listeners
-        menuBlocks.setOnClickListener(v -> switchTab("blocks"));
-        menuAdultBlock.setOnClickListener(v -> switchTab("adult"));
+        // Sidebar Click Listeners (সাথে ড্রয়ার ক্লোজ করার লজিক)
+        menuBlocks.setOnClickListener(v -> {
+            switchTab("blocks");
+            drawerLayout.closeDrawer(GravityCompat.START);
+        });
+        menuAdultBlock.setOnClickListener(v -> {
+            switchTab("adult");
+            drawerLayout.closeDrawer(GravityCompat.START);
+        });
 
         // Sub Tab Click Listeners
         tabStrictProtocols1.setOnClickListener(v -> switchSubTab("strict"));
@@ -135,6 +163,15 @@ public class ControlActivity extends Activity {
             refreshListUI("blocked_words", websiteListContainer);
         });
         refreshListUI("blocked_words", websiteListContainer);
+        
+        EditText appInput = findViewById(R.id.appInput);
+        LinearLayout appListContainer = findViewById(R.id.appListContainer);
+        findViewById(R.id.btnAddApp).setOnClickListener(v -> {
+            addStringToList("blocked_apps", appInput.getText().toString());
+            appInput.setText("");
+            refreshListUI("blocked_apps", appListContainer);
+        });
+        refreshListUI("blocked_apps", appListContainer);
     }
 
     private void setupAdultBlockTab() {
