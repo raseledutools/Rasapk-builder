@@ -1,4 +1,4 @@
-]package com.capacitorjs.app.testapp;
+package com.capacitorjs.app.testapp;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
