@@ -41,6 +41,9 @@ public class FocusAccessibilityService extends AccessibilityService {
     private boolean isOverlayShowing = false;
     private boolean isSmallOverlayShowing = false;
     
+    // টাইপিংয়ের পর অ্যাপ ক্লোজ ঠেকানোর জন্য একটি টাইমার
+    private long lastTypingTime = 0; 
+    
     private final Random random = new Random();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
@@ -173,8 +176,19 @@ public class FocusAccessibilityService extends AccessibilityService {
         String packageName = event.getPackageName().toString().toLowerCase();
         int eventType = event.getEventType();
 
-        backgroundExecutor.execute(() -> {
+        // ১. টাইপিং প্রোটেকশন: ইভেন্ট টাইপ টেক্সট চেঞ্জ হলে সাথে সাথে ক্লিয়ার করবে। 
+        // এর ফলে অ্যাপ কখনোই ক্লোজ হবে না।
+        if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+            lastTypingTime = System.currentTimeMillis(); // টাইপ করার সময়টা নোট করে রাখলাম
+            SharedPreferences prefs = getSharedPreferences("RasFocusPrefs", MODE_PRIVATE);
+            boolean isBlockingActive = prefs.getBoolean("is_blocking_active", true);
+            if (isBlockingActive) {
+                checkAndClearTyping(event, prefs);
+            }
+            return; 
+        }
 
+        backgroundExecutor.execute(() -> {
             SharedPreferences prefs = getSharedPreferences("RasFocusPrefs", MODE_PRIVATE);
             
             // ===================================================================
@@ -198,19 +212,9 @@ public class FocusAccessibilityService extends AccessibilityService {
                 }
             }
 
-            // ===================================================================
-            // মাস্টার টগল চেক (বাই ডিফল্ট true থাকবে)
-            // ===================================================================
+            // মাস্টার টগল চেক
             boolean isBlockingActive = prefs.getBoolean("is_blocking_active", true);
-            if (!isBlockingActive) return; // ইউজার অফ করে রাখলে স্ক্যানিং হবে না
-
-            // ===================================================================
-            // লজিক ১: টাইপিং প্রোটেকশন (লেখা মুছবে এবং হাদিস পপ-আপ দেখাবে)
-            // ===================================================================
-            if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-                checkAndClearTyping(event, prefs);
-                return; 
-            }
+            if (!isBlockingActive) return; 
 
             AccessibilityNodeInfo rootNode = getRootInActiveWindow();
             if (rootNode == null) return;
@@ -238,17 +242,19 @@ public class FocusAccessibilityService extends AccessibilityService {
             // ===================================================================
             if (checkDangerZoneProtection(rootNode, packageName)) {
                 mainHandler.post(() -> {
-                    performGlobalAction(GLOBAL_ACTION_HOME); // হোম স্ক্রিনে পাঠানো
-                    showFakeCrashOverlay(); // "Not Responding" ফেক স্ক্রিন দেখানো
+                    performGlobalAction(GLOBAL_ACTION_HOME);
+                    showFakeCrashOverlay(); 
                 });
                 rootNode.recycle();
                 return;
             } 
             
             // ===================================================================
-            // লজিক ২: স্ক্রিন এবং ওয়েবসাইট স্ক্যানিং
+            // লজিক ২: স্ক্রিন এবং ওয়েবসাইট স্ক্যানিং (টাইপিং কুলডাউন সহ)
             // ===================================================================
-            if (!isSettingsApp(packageName)) {
+            // টাইপ করার অন্তত ২ সেকেন্ড পার হলে তবেই স্ক্রিন স্ক্যানার কাজ করবে।
+            // এতে করে টাইপ করার সময় সাজেশন আসলে অ্যাপ ক্লোজ হবে না।
+            if (!isSettingsApp(packageName) && (System.currentTimeMillis() - lastTypingTime > 2000)) {
                 if (scanForHardcoreScreen(rootNode, prefs)) {
                     mainHandler.post(() -> {
                         performGlobalAction(GLOBAL_ACTION_HOME);
@@ -262,7 +268,7 @@ public class FocusAccessibilityService extends AccessibilityService {
     }
 
     // =========================================================================
-    // হেল্পার মেথডস (লজিক ইমপ্লিমেন্টেশন)
+    // হেল্পার মেথডস 
     // =========================================================================
 
     private String detectShortsOrReels(AccessibilityNodeInfo node, String pkg) {
@@ -329,6 +335,7 @@ public class FocusAccessibilityService extends AccessibilityService {
             if (matchFound) break;
         }
 
+        // যদি শব্দ ম্যাচ করে, তবে শুধু লেখা মুছে দেবে। অ্যাপ ক্লোজ করবে না!
         if (matchFound) {
             mainHandler.post(() -> {
                 Bundle arguments = new Bundle();
@@ -344,6 +351,9 @@ public class FocusAccessibilityService extends AccessibilityService {
 
     private boolean scanForHardcoreScreen(AccessibilityNodeInfo node, SharedPreferences prefs) {
         if (node == null) return false;
+
+        // **ম্যাজিক লাইন:** যদি ইউজার কোনো বক্সে টাইপ করার জন্য ক্লিক করে থাকে, তবে সেই বক্স স্ক্যানার ইগনোর করবে!
+        if (node.isEditable()) return false; 
 
         CharSequence text = node.getText();
         CharSequence desc = node.getContentDescription();
@@ -412,7 +422,7 @@ public class FocusAccessibilityService extends AccessibilityService {
     }
 
     // =========================================================================
-    // UI ওভারলে এবং লাইফসাইকেল
+    // UI ওভারলে 
     // =========================================================================
 
     private void showSmallWarning(String message) {
@@ -472,7 +482,6 @@ public class FocusAccessibilityService extends AccessibilityService {
         showSafetyOverlayCustom(quotes.get(random.nextInt(quotes.size())), false);
     }
 
-    // isCrashScreen প্যারামিটার দিয়ে বোঝা যাবে এটি ফেক ক্র্যাশ নাকি সাধারণ হাদিস
     private void showSafetyOverlayCustom(String message, boolean isCrashScreen) {
         if (isOverlayShowing) return;
         isOverlayShowing = true;
@@ -481,7 +490,6 @@ public class FocusAccessibilityService extends AccessibilityService {
             windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
             LinearLayout layout = new LinearLayout(this);
             
-            // ফেক ক্র্যাশের জন্য ফুল ব্ল্যাক ব্যাকগ্রাউন্ড, সাধারণের জন্য ডার্ক ব্লু
             if(isCrashScreen) {
                 layout.setBackgroundColor(Color.BLACK);
             } else {
@@ -495,7 +503,6 @@ public class FocusAccessibilityService extends AccessibilityService {
             TextView tv = new TextView(this);
             tv.setText(message);
             
-            // ফেক ক্র্যাশের জন্য একটু ফেড টেক্সট (অরিজিনাল এন্ড্রয়েড ক্র্যাশ ডায়ালগের মতো)
             if(isCrashScreen) {
                 tv.setTextColor(Color.LTGRAY);
                 tv.setTextSize(18);
@@ -509,7 +516,6 @@ public class FocusAccessibilityService extends AccessibilityService {
             tv.setTypeface(Typeface.DEFAULT_BOLD);
             layout.addView(tv);
 
-            // ফেক ক্র্যাশের সময় কোনো ক্লোজ বাটন থাকবে না (ইউজার ফেঁসে যাবে)
             if (!isCrashScreen) {
                 Button closeButton = new Button(this);
                 closeButton.setText("Close / বন্ধ করুন");
