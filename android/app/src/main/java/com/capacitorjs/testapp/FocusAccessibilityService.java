@@ -40,14 +40,19 @@ public class FocusAccessibilityService extends AccessibilityService {
     
     private boolean isOverlayShowing = false;
     private boolean isSmallOverlayShowing = false;
+    
+    // টাইমিং কন্ট্রোল ভেরিয়েবলস (ক্র্যাশ এবং রেস কন্ডিশন ঠেকানোর জন্য)
     private long lastTypingTime = 0; 
+    private long lastScanTime = 0;
+    private static final long SCAN_INTERVAL_MS = 1000; // প্রতি ১ সেকেন্ডে একবার স্ক্যান করবে (Memory Save)
+    private static final long TYPING_DELAY_MS = 5000;  // টাইপ করার পর ৫ সেকেন্ড পর্যন্ত স্ক্যানার ঘুমাবে
     
     private final Random random = new Random();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
 
     // ==========================================
-    // QUOTES DATABASES (From tab_adult & tab_blocks)
+    // QUOTES DATABASES
     // ==========================================
     private final List<String> motivationalQuotes = Arrays.asList(
             "সময়ের মূল্য বোঝো, জীবন তোমার মূল্য বুঝবে।",
@@ -136,16 +141,31 @@ public class FocusAccessibilityService extends AccessibilityService {
         String packageName = event.getPackageName().toString().toLowerCase();
         int eventType = event.getEventType();
 
+        // কীবোর্ড অ্যাপগুলোকে ইগনোর করা হচ্ছে
+        if (packageName.contains("inputmethod") || packageName.contains("keyboard") || packageName.contains("gboard")) {
+            if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+                lastTypingTime = System.currentTimeMillis();
+            }
+            return;
+        }
+
         SharedPreferences prefs = getSharedPreferences("RasFocusPrefs", MODE_PRIVATE);
 
         // ===================================================================
-        // 1. GLOBAL KEYLOGGER (TYPING PROTECTION) - Like WH_KEYBOARD_LL
+        // 1. GLOBAL KEYLOGGER (TYPING PROTECTION)
         // ===================================================================
         if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
             lastTypingTime = System.currentTimeMillis(); 
             checkAndClearTyping(event, prefs);
             return; 
         }
+
+        // ===================================================================
+        // THROTTLE LOGIC (Memory Save)
+        // ===================================================================
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastScanTime < SCAN_INTERVAL_MS) return; 
+        lastScanTime = currentTime;
 
         backgroundExecutor.execute(() -> {
             AccessibilityNodeInfo rootNode = getRootInActiveWindow();
@@ -155,7 +175,7 @@ public class FocusAccessibilityService extends AccessibilityService {
             boolean isFocusActive = System.currentTimeMillis() < breakUntil;
 
             // ===================================================================
-            // 2. PANIC LOCKDOWN & APP BLOCKER (tab_strict & tab_blocks)
+            // 2. PANIC LOCKDOWN & APP BLOCKER (100% Bulletproof App Catching)
             // ===================================================================
             if (isFocusActive) {
                 boolean isPhoneApp = packageName.contains("dialer") || 
@@ -164,29 +184,25 @@ public class FocusAccessibilityService extends AccessibilityService {
                                      packageName.contains("contacts") ||
                                      packageName.equals("com.capacitorjs.app.testapp");
 
-                // Panic Mode: Kill Browsers Instantly
+                // Panic Mode
                 if (browserPackages.contains(packageName)) {
                     triggerGlobalBlockAlert(rootNode, "PANIC LOCKDOWN ACTIVE: Browsers are locked!");
                     return;
                 }
 
-                // Custom App Blocker
+                // App Blocker (Package Name Check)
                 Set<String> blockedApps = prefs.getStringSet("blocked_apps", new HashSet<>());
-                for(String app : blockedApps) {
-                    if(packageName.contains(app.toLowerCase().replace(".exe", ""))) {
+                for (String app : blockedApps) {
+                    String cleanApp = app.toLowerCase().replace(".exe", "").trim();
+                    if (!cleanApp.isEmpty() && packageName.contains(cleanApp)) {
                         triggerGlobalBlockAlert(rootNode, "Focus Active: App is blocked.");
                         return;
                     }
                 }
-
-                // Full Device Lock (If Not Phone App)
-                if (!isPhoneApp && !packageName.equals("com.android.systemui")) {
-                    // Allowed apps logic can be expanded here
-                }
             }
 
             // ===================================================================
-            // 3. STRICT MODE (ANTI-BYPASS) - tab_strict
+            // 3. STRICT MODE (ANTI-BYPASS)
             // ===================================================================
             if (checkAntiBypassProtection(rootNode, packageName)) {
                 mainHandler.post(() -> {
@@ -198,7 +214,7 @@ public class FocusAccessibilityService extends AccessibilityService {
             } 
 
             // ===================================================================
-            // 4. INCOGNITO / PRIVATE TAB BLOCKER - tab_strict
+            // 4. INCOGNITO / PRIVATE TAB BLOCKER
             // ===================================================================
             boolean isIncognitoBlocked = prefs.getBoolean("chkIncognito", false);
             if (isIncognitoBlocked && browserPackages.contains(packageName)) {
@@ -227,11 +243,11 @@ public class FocusAccessibilityService extends AccessibilityService {
             }
 
             // ===================================================================
-            // 6. SCREEN & URL SCANNING (UIAutomation Alternative)
+            // 6. SCREEN & URL SCANNING (App Content & URL Check)
             // ===================================================================
-            if (!isSettingsApp(packageName) && (System.currentTimeMillis() - lastTypingTime > 2000)) {
+            if (!isSettingsApp(packageName) && (System.currentTimeMillis() - lastTypingTime > TYPING_DELAY_MS)) {
                 if (scanScreenContent(rootNode, prefs)) {
-                    triggerGlobalBlockAlert(rootNode, ""); // Show motivational/religious quote
+                    triggerGlobalBlockAlert(rootNode, ""); 
                     return;
                 }
             }
@@ -241,14 +257,14 @@ public class FocusAccessibilityService extends AccessibilityService {
     }
 
     // =========================================================================
-    // HELPER METHODS (LOCKED LOGICS)
+    // HELPER METHODS
     // =========================================================================
 
     private void triggerGlobalBlockAlert(AccessibilityNodeInfo rootNode, String customMsg) {
         mainHandler.post(() -> {
             performGlobalAction(GLOBAL_ACTION_HOME);
             if (customMsg.isEmpty()) {
-                showSafetyOverlay(); // Shows random quote
+                showSafetyOverlay();
             } else {
                 showSafetyOverlayCustom(customMsg, false);
             }
@@ -320,7 +336,11 @@ public class FocusAccessibilityService extends AccessibilityService {
             if (word.isEmpty()) continue;
             if (chkHardcore) { for (String k : hardcoreKeywords) if (word.equals(k)) matchFound = true; }
             if (!matchFound && chkRomantic) { for (String k : romanticKeywords) if (word.equals(k)) matchFound = true; }
-            if (!matchFound) { for (String k : customWords) if (word.equals(k.toLowerCase())) matchFound = true; }
+            if (!matchFound) { 
+                for (String k : customWords) {
+                    if (word.equals(k.toLowerCase().trim())) matchFound = true; 
+                }
+            }
             if (matchFound) break;
         }
 
@@ -337,6 +357,9 @@ public class FocusAccessibilityService extends AccessibilityService {
         source.recycle();
     }
 
+    // ===================================================================
+    // 100% BULLETPROOF SCREEN & URL SCANNER
+    // ===================================================================
     private boolean scanScreenContent(AccessibilityNodeInfo node, SharedPreferences prefs) {
         if (node == null) return false;
         if (node.isEditable()) return false; 
@@ -349,19 +372,36 @@ public class FocusAccessibilityService extends AccessibilityService {
         boolean chkAdult = prefs.getBoolean("chkAdult", true);
         boolean chkHardcore = prefs.getBoolean("chkHardcore", true);
         Set<String> customWords = prefs.getStringSet("blocked_words", new HashSet<>());
+        Set<String> blockedApps = prefs.getStringSet("blocked_apps", new HashSet<>());
 
+        // Adult Sites Check
         if (chkAdult) {
             for (String site : adultWebsites) {
                 if (content.contains(site)) return true;
             }
         }
+        // Hardcore Check
         if (chkHardcore) {
             for (String k : hardcoreKeywords) {
                 if (content.contains(" " + k + " ")) return true;
             }
         }
-        for (String k : customWords) {
-            if (content.contains(" " + k.toLowerCase() + " ") || content.contains(k.toLowerCase() + ".com")) return true;
+        
+        // 1. User Website / Keyword Check (FIXED BUG)
+        for (String word : customWords) {
+            String cleanWord = word.toLowerCase().trim();
+            if (!cleanWord.isEmpty() && content.contains(cleanWord)) return true;
+        }
+        
+        // 2. User App Name Check on Screen (Catches apps with weird package names)
+        long breakUntil = prefs.getLong("break_until", 0);
+        boolean isFocusActive = System.currentTimeMillis() < breakUntil;
+        
+        if (isFocusActive) {
+            for (String app : blockedApps) {
+                String cleanApp = app.toLowerCase().replace(".exe", "").trim();
+                if (!cleanApp.isEmpty() && content.contains(cleanApp)) return true;
+            }
         }
 
         for (int i = 0; i < node.getChildCount(); i++) {
@@ -449,7 +489,6 @@ public class FocusAccessibilityService extends AccessibilityService {
     }
 
     private void showSafetyOverlay() {
-        // Randomly pick a quote (Mixing Motivational and Religious)
         String quote = random.nextBoolean() ? 
                        motivationalQuotes.get(random.nextInt(motivationalQuotes.size())) : 
                        religiousQuotes.get(random.nextInt(religiousQuotes.size()));
