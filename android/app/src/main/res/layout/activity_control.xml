@@ -185,6 +185,8 @@
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#FFFFFF" android:padding="15dp">
                         
+                        <Button android:id="@+id/btnStartFocusStrict" android:layout_width="match_parent" android:layout_height="45dp" android:text="Start Strict Focus" android:textColor="#FFFFFF" android:backgroundTint="#62AC1E" android:textStyle="bold" android:textSize="16sp" android:layout_marginBottom="20dp"/>
+
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Advanced Security &amp; Tracking:" android:textColor="#333333" android:textStyle="bold" android:textSize="16sp" android:layout_marginBottom="15dp"/>
 
                         <CheckBox android:id="@+id/chkUrlTracking" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Silent URL Tracking" android:buttonTint="#0DA4A6" android:textColor="#333333" android:textSize="15sp" android:layout_marginBottom="10dp"/>
