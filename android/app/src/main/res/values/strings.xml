@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">RasFocus</string>
+    <string name="app_name">RasConverter</string>
     <string name="title_activity_main">RasFocus</string>
     <string name="package_name">com.capacitorjs.app.testapp</string>
     <string name="custom_url_scheme">com.capacitorjs.app.testapp</string>
